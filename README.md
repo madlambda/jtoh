@@ -7,7 +7,7 @@ work with any long list/stream of JSON documents.
 # Why ?
 
  There is some good tools to parse JSON, like [jq](https://stedolan.github.io/jq/manual), which I usually use.
- But my scenario involved processing long lists of JSON documents, like this (but much bigger):
+ But my problem involved processing long lists of JSON documents, like this (but much bigger):
  
  ```json
  [
