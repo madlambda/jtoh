@@ -29,9 +29,10 @@ work with any long list/stream of JSON documents.
  The behavior that I wanted is the exact same behavior as
  Go's [json.Decoder.Decode](https://golang.org/pkg/encoding/json/#Decoder.Decode), which is to handle
  JSON lists as an incremental decoding of each JSON document inside the list, done in a streaming
- fashion, hence this tool was built using Go =P. But is not a replacement for jq with streaming
+ fashion, hence this tool was built (and using Go =P). But is not a replacement for jq with streaming
  capabilities because it focuses on just projecting a few fields from JSON documents in a newline
- oriented fashion, there is no filtering or any advanced features
+ oriented fashion, there is no filtering or any advanced features (it is mainly a JSON structured
+ log analyzer).
  
  # What
  
