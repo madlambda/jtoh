@@ -10,7 +10,10 @@ build:
 
 .PHONY: lint
 lint:
-	@echo TODO
+	@golangci-lint run ./... \
+	    --enable=unparam --enable=unconvert --enable=dupl --enable=gofmt \
+	    --enable=stylecheck --enable=scopelint --enable=nakedret --enable=misspell \
+	    --enable=goconst --enable=dogsled --enable=bodyclose --enable=whitespace
 
 .PHONY: test
 test:
