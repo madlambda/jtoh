@@ -30,7 +30,7 @@ jobs:
       run: go test -race ./...
 
   linting:
-    name: Build and Test
+    name: Linting
 
     runs-on: ubuntu-latest
 
