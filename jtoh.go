@@ -24,5 +24,8 @@ import (
 // If the jsons reader returns a non-nil non-EOF error the error
 // will also be returned on the transformed reader Read call.
 func Transform(jsons io.Reader, selector string) (io.Reader, error) {
+	// TODO:
+	// - selector validation
+	// - jsons read errors
 	return strings.NewReader(""), nil
 }
