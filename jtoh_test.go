@@ -28,7 +28,8 @@ func TestTransform(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
+	for i := range tests {
+		test := tests[i]
 		output := strings.NewReader(strings.Join(test.output, "\n"))
 
 		t.Run(test.name+"WithList", func(t *testing.T) {
