@@ -62,7 +62,7 @@ to be used to compose each newline and what is the separator between each field:
 
  ```
  data1:data2
- data3:data4
+ data1:data2
  ```
 
  It is very limited on what it can do and it is not supposed to save the world =P.
