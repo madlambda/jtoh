@@ -26,19 +26,32 @@ func TestTransform(t *testing.T) {
 			input:    []string{},
 			output:   []string{},
 		},
+		{
+			name:     "SingleSelectStringField",
+			selector: ":string",
+			input:    []string{`{"string":"lala"}`},
+			output:   []string{`lala`},
+		},
+		{
+			name:     "SingleSelectIntField",
+			selector: ":int",
+			input:    []string{`{"int":666}`},
+			output:   []string{`666`},
+		},
 	}
 
 	for i := range tests {
 		test := tests[i]
-		output := strings.NewReader(strings.Join(test.output, "\n"))
 
 		t.Run(test.name+"WithList", func(t *testing.T) {
 			input := strings.NewReader("[" + strings.Join(test.input, ",") + "]")
+			output := strings.NewReader(strings.Join(test.output, "\n"))
 			testTransform(t, input, test.selector, output, test.wantErr)
 		})
 
 		t.Run(test.name+"WithStream", func(t *testing.T) {
 			input := strings.NewReader(strings.Join(test.input, "\n"))
+			output := strings.NewReader(strings.Join(test.output, "\n"))
 			testTransform(t, input, test.selector, output, test.wantErr)
 		})
 	}
@@ -53,7 +66,7 @@ func testTransform(
 ) {
 	t.Helper()
 
-	got, err := jtoh.Transform(input, selector)
+	got, err := jtoh.Transform(selector, input)
 
 	if wantErr != nil {
 		if !errors.Is(err, wantErr) {
@@ -76,7 +89,7 @@ func testTransform(
 	wantData := readAll(t, want)
 
 	if gotData != wantData {
-		t.Errorf("got:\n\n%s\n\nwant:\n\n%s\n", gotData, wantData)
+		t.Errorf("got %q want %q", gotData, wantData)
 	}
 }
 

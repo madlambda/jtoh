@@ -17,7 +17,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -race -coverprofile=$(cov) ./...
+	go test -timeout 10s -race -coverprofile=$(cov) ./...
 
 .PHONY: coverage
 coverage: test
