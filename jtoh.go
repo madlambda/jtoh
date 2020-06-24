@@ -1,6 +1,9 @@
 package jtoh
 
-import "io"
+import (
+	"io"
+	"strings"
+)
 
 // Transform received a json stream reader and transforms it
 // in a newline separated text with only the fields defined
@@ -21,5 +24,5 @@ import "io"
 // If the jsons reader returns a non-nil non-EOF error the error
 // will also be returned on the transformed reader Read call.
 func Transform(jsons io.Reader, selector string) (io.Reader, error) {
-	return nil, nil
+	return strings.NewReader(""), nil
 }
