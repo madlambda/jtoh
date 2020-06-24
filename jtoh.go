@@ -77,9 +77,10 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 		}
 
 		firstToken := buf[0]
-		if isSpace(firstToken) {
-			continue
-		}
+		// Test space handling
+		//if isSpace(firstToken) {
+		//continue
+		//}
 
 		if firstToken == '[' {
 			return jsons, true
