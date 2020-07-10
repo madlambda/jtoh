@@ -30,7 +30,7 @@ func New(selector string) (J, error) {
 	// TODO:
 	// - selector validation
 	return J{
-		selector: selector,
+		selector: selector[1:],
 	}, nil
 }
 
