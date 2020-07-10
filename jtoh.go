@@ -9,6 +9,7 @@ import (
 
 // J is a jtoh transformer, it transforms JSON into something more human
 type J struct {
+	selector string
 }
 
 // New creates a new jtoh transformer using the given selector.
@@ -28,7 +29,9 @@ type J struct {
 func New(selector string) (J, error) {
 	// TODO:
 	// - selector validation
-	return J{}, nil
+	return J{
+		selector: selector,
+	}, nil
 }
 
 // Do receives a json stream as input and transforms it
@@ -46,14 +49,24 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 		err := dec.Decode(&m)
 		if err != nil {
 			// TODO: handle non disruptive parse errors
-			fmt.Fprintf(textOutput, "jtoh:error:%v", err)
+			// Ideally we want the original non-JSON data
+			// Will need some form of extended reader that remembers
+			// part of the read data (not all, don't want O(N) spatial
+			// complexity).
 			return
 		}
-		// TODO: this is obviously wrong
-		for _, v := range m {
-			fmt.Fprint(textOutput, v)
-		}
+
+		fmt.Fprint(textOutput, selectField(j.selector, m))
 	}
+}
+
+func selectField(selector string, doc map[string]interface{}) string {
+	v, ok := doc[selector]
+	if !ok {
+		return ""
+	}
+	return fmt.Sprint(v)
+
 }
 
 func isList(jsons io.Reader) (io.Reader, bool) {
@@ -66,7 +79,7 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 		}
 
 		firstToken := buf[0]
-		// Test space handling
+		// TODO: Test space handling
 		//if isSpace(firstToken) {
 		//continue
 		//}

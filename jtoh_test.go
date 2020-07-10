@@ -12,6 +12,10 @@ import (
 	"github.com/katcipis/jtoh"
 )
 
+// TODO:
+// Test JSON stream that has a list inside
+// Test JSON List that has a list inside
+
 func TestTransform(t *testing.T) {
 	type Test struct {
 		name     string
@@ -104,6 +108,10 @@ func testTransform(
 			t.Errorf("line[%d]: got %q != want %q", lineCount, gotLine, wantLine)
 		}
 		lineCount += 1
+	}
+
+	if lineCount != len(want) {
+		t.Errorf("got %d lines, want %d", lineCount, len(want))
 	}
 
 	if err := gotLines.Err(); err != nil {
