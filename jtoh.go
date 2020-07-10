@@ -65,7 +65,7 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 		for i, fieldSelector := range j.fieldSelectors {
 			fieldValues[i] = selectField(fieldSelector, m)
 		}
-		fmt.Fprint(textOutput, strings.Join(fieldValues, j.separator))
+		fmt.Fprint(textOutput, strings.Join(fieldValues, j.separator)+"\n")
 	}
 }
 
