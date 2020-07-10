@@ -45,6 +45,18 @@ func TestTransform(t *testing.T) {
 			output:   []string{`666`},
 		},
 		{
+			name:     "SingleSelectBoolField",
+			selector: ":bool",
+			input:    []string{`{"bool":true}`},
+			output:   []string{`true`},
+		},
+		{
+			name:     "SingleSelectNullField",
+			selector: ":null",
+			input:    []string{`{"null":null}`},
+			output:   []string{`<nil>`},
+		},
+		{
 			name:     "SingleNestedSelectStringField",
 			selector: ":nested.string",
 			input:    []string{`{"nested" : { "string":"lala"} }`},
