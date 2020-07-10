@@ -64,7 +64,7 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 func selectField(selector string, doc map[string]interface{}) string {
 	v, ok := doc[selector]
 	if !ok {
-		return ""
+		return fmt.Sprintf("<jtoh:missing field %q>", selector)
 	}
 	return fmt.Sprint(v)
 

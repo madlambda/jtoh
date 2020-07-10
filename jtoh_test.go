@@ -51,6 +51,12 @@ func TestTransform(t *testing.T) {
 			output:   []string{`666`},
 		},
 		{
+			name:     "MissingField",
+			selector: ":missing",
+			input:    []string{`{"int":666,"ignored":"hi"}`},
+			output:   []string{`<jtoh:missing field "missing">`},
+		},
+		{
 			name:     "IgnoreSpacesOnBeginning",
 			selector: ":string",
 			input:    []string{` {"string":"lala"}`},
