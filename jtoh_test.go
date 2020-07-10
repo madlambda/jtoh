@@ -60,6 +60,18 @@ func TestTransform(t *testing.T) {
 			output:   []string{`<nil>`},
 		},
 		{
+			name:     "SingleSelectMultipleObjs",
+			selector: ":string",
+			input: []string{
+				`{"string":"one"}`,
+				`{"string":"two"}`,
+			},
+			output: []string{
+				`one`,
+				`two`,
+			},
+		},
+		{
 			name:     "SingleNestedSelectStringField",
 			selector: ":nested.string",
 			input:    []string{`{"nested" : { "string":"lala"} }`},
@@ -76,6 +88,12 @@ func TestTransform(t *testing.T) {
 			selector: ":string:number:bool",
 			input:    []string{`{"string":"hi","number":7,"bool":false}`},
 			output:   []string{`hi:7:false`},
+		},
+		{
+			name:     "MultipleSelectedFieldsWithOneMissing",
+			selector: ":string:number:missing:bool",
+			input:    []string{`{"string":"hi","number":7,"bool":false}`},
+			output:   []string{fmt.Sprintf(`hi:7:%s:false`, missingFieldErrMsg("missing"))},
 		},
 		{
 			name:     "IncompletePathToField",
