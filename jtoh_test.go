@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -69,6 +70,18 @@ func TestTransform(t *testing.T) {
 			output:   []string{`13`},
 		},
 		{
+			name:     "IncompletePathToField",
+			selector: ":nested.number",
+			input:    []string{`{"nested" : {} }`},
+			output:   []string{missingFieldErrMsg("nested.number")},
+		},
+		{
+			name:     "PathToFieldWithWrongType",
+			selector: ":nested.number",
+			input:    []string{`{"nested" : "notObj" }`},
+			output:   []string{missingFieldErrMsg("nested.number")},
+		},
+		{
 			name:     "UnselectedFieldIsIgnored",
 			selector: ":number",
 			input:    []string{`{"number":666,"ignored":"hi"}`},
@@ -78,7 +91,7 @@ func TestTransform(t *testing.T) {
 			name:     "MissingField",
 			selector: ":missing",
 			input:    []string{`{"number":666,"ignored":"hi"}`},
-			output:   []string{`<jtoh:missing field "missing">`},
+			output:   []string{missingFieldErrMsg("missing")},
 		},
 		{
 			name:     "IgnoreSpacesOnBeginning",
@@ -178,4 +191,8 @@ func readAll(t *testing.T, r io.Reader) string {
 	}
 
 	return string(v)
+}
+
+func missingFieldErrMsg(selector string) string {
+	return fmt.Sprintf("<jtoh:missing field %q>", selector)
 }

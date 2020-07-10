@@ -61,7 +61,7 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 	}
 }
 
-func selectField(selector string, doc map[string]interface{}) string {
+func selectField(selector string, obj map[string]interface{}) string {
 	const accessOp = "."
 
 	fields := strings.Split(selector, accessOp)
@@ -69,15 +69,17 @@ func selectField(selector string, doc map[string]interface{}) string {
 	finalField := fields[len(fields)-1]
 
 	for _, pathField := range pathFields {
-		v, ok := doc[pathField]
+		v, ok := obj[pathField]
 		if !ok {
 			return missingFieldErrMsg(selector)
 		}
-		// TODO: test cast failure
-		doc = v.(map[string]interface{})
+		obj, ok = v.(map[string]interface{})
+		if !ok {
+			return missingFieldErrMsg(selector)
+		}
 	}
 
-	v, ok := doc[finalField]
+	v, ok := obj[finalField]
 	if !ok {
 		return missingFieldErrMsg(selector)
 	}
