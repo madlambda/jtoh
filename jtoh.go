@@ -7,10 +7,11 @@ import (
 	"strings"
 )
 
-// Transform received a json stream reader and transforms it
-// in a newline separated text stream containing only the fields defined
-// by the given selector and in the same order.
-//
+// J is a jtoh transformer, it transforms JSON into something more human
+type J struct {
+}
+
+// New creates a new jtoh transformer using the given selector.
 // The selector is on the form <separator><field selector 1><separator><field selector 2>
 // For example, given ":" as a separator you can define:
 //
@@ -23,46 +24,34 @@ import (
 // Making "." the only character that will not be allowed to be used
 // as a separator since it is already a selector for nested fields.
 //
-// If the jsons reader returns a non-nil non-EOF error the error
-// will also be returned on the transformed reader Read call.
-//
-// The second reader returned is to be handled as an message error stream.
-// If there is a parsing error in the middle of the transformation process
-// it will go on writing the parse errors on the returned error stream.
-//
-// If the returned error is non-nil the stream can be safely ignored,
-// otherwise it is the responsibility of the caller to read it
-// until EOF (or other error) is reached, failing on do so will leak resources.
-func Transform(selector string, jsons io.Reader) (io.Reader, error) {
+// If the selector is invalid it returns an error.
+func New(selector string) (J, error) {
 	// TODO:
 	// - selector validation
-	// - jsons read errors
-	reader, writer := io.Pipe()
-
-	go transform(selector, jsons, writer)
-
-	return reader, nil
+	return J{}, nil
 }
 
-func transform(selector string, jsons io.Reader, writer *io.PipeWriter) {
-	defer writer.Close()
-
-	// WHY: json.Decoder has no peek method :-(
-	// We need to detect if this is a json stream or just an gigantic json list.
-	jsons, _ = isList(jsons)
-	dec := json.NewDecoder(jsons)
+// Do receives a json stream as input and transforms it
+// in simple lines of text (newline-delimited) which is
+// then written in the provided writer.
+//
+// This function will block until all data is read from the input
+// and written on the output.
+func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
+	jsonInput, _ = isList(jsonInput)
+	dec := json.NewDecoder(jsonInput)
 
 	for dec.More() {
 		m := map[string]interface{}{}
 		err := dec.Decode(&m)
 		if err != nil {
 			// TODO: handle non disruptive parse errors
-			fmt.Fprintf(writer, "jtoh:error:%v", err)
+			fmt.Fprintf(textOutput, "jtoh:error:%v", err)
 			return
 		}
 		// TODO: this is obviously wrong
 		for _, v := range m {
-			fmt.Fprint(writer, v)
+			fmt.Fprint(textOutput, v)
 		}
 	}
 }

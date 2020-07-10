@@ -1,6 +1,8 @@
 package jtoh_test
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -45,14 +47,12 @@ func TestTransform(t *testing.T) {
 
 		t.Run(test.name+"WithList", func(t *testing.T) {
 			input := strings.NewReader("[" + strings.Join(test.input, ",") + "]")
-			output := strings.NewReader(strings.Join(test.output, "\n"))
-			testTransform(t, input, test.selector, output, test.wantErr)
+			testTransform(t, input, test.selector, test.output, test.wantErr)
 		})
 
 		t.Run(test.name+"WithStream", func(t *testing.T) {
 			input := strings.NewReader(strings.Join(test.input, "\n"))
-			output := strings.NewReader(strings.Join(test.output, "\n"))
-			testTransform(t, input, test.selector, output, test.wantErr)
+			testTransform(t, input, test.selector, test.output, test.wantErr)
 		})
 	}
 }
@@ -61,12 +61,12 @@ func testTransform(
 	t *testing.T,
 	input io.Reader,
 	selector string,
-	want io.Reader,
+	want []string,
 	wantErr error,
 ) {
 	t.Helper()
 
-	got, err := jtoh.Transform(selector, input)
+	j, err := jtoh.New(selector)
 
 	if wantErr != nil {
 		if !errors.Is(err, wantErr) {
@@ -80,16 +80,28 @@ func testTransform(
 		return
 	}
 
-	if got == nil {
-		t.Errorf("unexpected nil reader as result")
-		return
+	output := bytes.Buffer{}
+
+	j.Do(input, &output)
+
+	gotLines := bufio.NewScanner(&output)
+	lineCount := 0
+
+	for gotLines.Scan() {
+		gotLine := gotLines.Text()
+		if lineCount > len(want) {
+			t.Errorf("unexpected extra line: %q", gotLine)
+			continue
+		}
+		wantLine := want[lineCount]
+		if gotLine != wantLine {
+			t.Errorf("line[%d]:got %q != want %q", lineCount, gotLine, wantLine)
+		}
+		lineCount += 1
 	}
 
-	gotData := readAll(t, got)
-	wantData := readAll(t, want)
-
-	if gotData != wantData {
-		t.Errorf("got %q want %q", gotData, wantData)
+	if err := gotLines.Err(); err != nil {
+		t.Errorf("unexpected error scanning output lines: %v", err)
 	}
 }
 
