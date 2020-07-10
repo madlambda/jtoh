@@ -14,8 +14,9 @@ import (
 )
 
 // TODO:
-// Test JSON stream that has a list inside
-// Test JSON List that has a list inside
+// JSON stream that has a list inside
+// JSON List that has a list inside
+// Selector is non-ascii char
 
 func TestTransform(t *testing.T) {
 	type Test struct {
@@ -68,6 +69,12 @@ func TestTransform(t *testing.T) {
 			selector: ":nested.number",
 			input:    []string{`{"nested" : { "number":13} }`},
 			output:   []string{`13`},
+		},
+		{
+			name:     "MultipleSelectedFields",
+			selector: ":string:number:bool",
+			input:    []string{`{"string":"hi","number":7,"bool":false}`},
+			output:   []string{`hi:7:false`},
 		},
 		{
 			name:     "IncompletePathToField",
