@@ -40,6 +40,12 @@ func TestTransform(t *testing.T) {
 			input:    []string{`{"int":666}`},
 			output:   []string{`666`},
 		},
+		{
+			name:     "UnselectedFieldIsIgnored",
+			selector: ":int",
+			input:    []string{`{"int":666,"ignored":"hi"}`},
+			output:   []string{`666`},
+		},
 	}
 
 	for i := range tests {
@@ -95,7 +101,7 @@ func testTransform(
 		}
 		wantLine := want[lineCount]
 		if gotLine != wantLine {
-			t.Errorf("line[%d]:got %q != want %q", lineCount, gotLine, wantLine)
+			t.Errorf("line[%d]: got %q != want %q", lineCount, gotLine, wantLine)
 		}
 		lineCount += 1
 	}
