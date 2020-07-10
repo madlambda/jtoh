@@ -62,12 +62,24 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 }
 
 func selectField(selector string, doc map[string]interface{}) string {
-	v, ok := doc[selector]
+	const accessOp = "."
+
+	fields := strings.Split(selector, accessOp)
+
+	fieldSelector := fields[0]
+	v, ok := doc[fieldSelector]
+
 	if !ok {
 		return fmt.Sprintf("<jtoh:missing field %q>", selector)
 	}
-	return fmt.Sprint(v)
 
+	if len(fields) == 1 {
+		return fmt.Sprint(v)
+	}
+
+	// TODO: test cast failure
+	nestedObj := v.(map[string]interface{})
+	return selectField(strings.Join(fields[1:], accessOp), nestedObj)
 }
 
 func isList(jsons io.Reader) (io.Reader, bool) {
