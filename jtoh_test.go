@@ -17,6 +17,7 @@ import (
 // JSON stream that has a list inside
 // JSON List that has a list inside
 // Selector is non-ascii char
+// Invalid selectors
 
 func TestTransform(t *testing.T) {
 	type Test struct {

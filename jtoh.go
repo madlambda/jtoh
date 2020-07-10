@@ -9,7 +9,8 @@ import (
 
 // J is a jtoh transformer, it transforms JSON into something more human
 type J struct {
-	selector string
+	separator      string
+	fieldSelectors []string
 }
 
 // New creates a new jtoh transformer using the given selector.
@@ -29,8 +30,11 @@ type J struct {
 func New(selector string) (J, error) {
 	// TODO:
 	// - selector validation
+	// - handle non ascii selector
+	separator := string(selector[0])
 	return J{
-		selector: selector[1:],
+		separator:      separator,
+		fieldSelectors: strings.Split(string(selector[1:]), separator),
 	}, nil
 }
 
@@ -57,7 +61,11 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 			return
 		}
 
-		fmt.Fprint(textOutput, selectField(j.selector, m))
+		fieldValues := make([]string, len(j.fieldSelectors))
+		for i, fieldSelector := range j.fieldSelectors {
+			fieldValues[i] = selectField(fieldSelector, m)
+		}
+		fmt.Fprint(textOutput, strings.Join(fieldValues, j.separator))
 	}
 }
 
