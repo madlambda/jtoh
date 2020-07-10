@@ -188,7 +188,7 @@ func testTransform(
 
 	for gotLines.Scan() {
 		gotLine := gotLines.Text()
-		if lineCount > len(want) {
+		if lineCount >= len(want) {
 			t.Errorf("unexpected extra line: %q", gotLine)
 			continue
 		}

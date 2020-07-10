@@ -45,8 +45,12 @@ func New(selector string) (J, error) {
 // This function will block until all data is read from the input
 // and written on the output.
 func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
-	jsonInput, _ = isList(jsonInput)
+	jsonInput, ok := isList(jsonInput)
 	dec := json.NewDecoder(jsonInput)
+
+	if ok {
+		dec.Token()
+	}
 
 	for dec.More() {
 		m := map[string]interface{}{}
@@ -102,9 +106,11 @@ func missingFieldErrMsg(selector string) string {
 func isList(jsons io.Reader) (io.Reader, bool) {
 	buf := make([]byte, 1)
 
+	// WHY: was unable to find something like peek on json Decoder
 	for {
 		_, err := jsons.Read(buf)
 		if err != nil {
+			// FIXME: Probably would be better to fail here with a more clear error =P
 			return jsons, false
 		}
 
@@ -114,11 +120,15 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 		}
 
 		if firstToken == '[' {
-			return jsons, true
+			return io.MultiReader(strings.NewReader("["), jsons), true
 		}
 
-		// Got a JSON stream, need to prepend the { back again
-		return io.MultiReader(strings.NewReader("{"), jsons), false
+		if firstToken == '{' {
+			return io.MultiReader(strings.NewReader("{"), jsons), false
+		}
+
+		// FIXME: Probably would be better to fail here with a more clear error =P
+		return jsons, false
 	}
 }
 
