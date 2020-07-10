@@ -90,6 +90,18 @@ func TestTransform(t *testing.T) {
 			output:   []string{`hi:7:false`},
 		},
 		{
+			name:     "MultipleSelectedFieldsMultipleObjs",
+			selector: ":string:number:bool",
+			input: []string{
+				`{"string":"hi","number":7,"bool":false}`,
+				`{"number":6.6,"bool":true,"string":"katz"}`,
+			},
+			output: []string{
+				`hi:7:false`,
+				`katz:6.6:true`,
+			},
+		},
+		{
 			name:     "MultipleSelectedFieldsWithOneMissing",
 			selector: ":string:number:missing:bool",
 			input:    []string{`{"string":"hi","number":7,"bool":false}`},
