@@ -39,25 +39,25 @@ func TestTransform(t *testing.T) {
 			name:     "SingleSelectStringField",
 			selector: ":string",
 			input:    []string{`{"string":"lala"}`},
-			output:   []string{`lala`},
+			output:   []string{"lala"},
 		},
 		{
 			name:     "SingleSelectNumberField",
 			selector: ":number",
 			input:    []string{`{"number":666}`},
-			output:   []string{`666`},
+			output:   []string{"666"},
 		},
 		{
 			name:     "SingleSelectBoolField",
 			selector: ":bool",
 			input:    []string{`{"bool":true}`},
-			output:   []string{`true`},
+			output:   []string{"true"},
 		},
 		{
 			name:     "SingleSelectNullField",
 			selector: ":null",
 			input:    []string{`{"null":null}`},
-			output:   []string{`<nil>`},
+			output:   []string{"<nil>"},
 		},
 		{
 			name:     "SingleSelectMultipleObjs",
@@ -67,27 +67,27 @@ func TestTransform(t *testing.T) {
 				`{"string":"two"}`,
 			},
 			output: []string{
-				`one`,
-				`two`,
+				"one",
+				"two",
 			},
 		},
 		{
 			name:     "SingleNestedSelectStringField",
 			selector: ":nested.string",
 			input:    []string{`{"nested" : { "string":"lala"} }`},
-			output:   []string{`lala`},
+			output:   []string{"lala"},
 		},
 		{
 			name:     "SingleNestedSelectNumberField",
 			selector: ":nested.number",
 			input:    []string{`{"nested" : { "number":13} }`},
-			output:   []string{`13`},
+			output:   []string{"13"},
 		},
 		{
 			name:     "MultipleSelectedFields",
 			selector: ":string:number:bool",
 			input:    []string{`{"string":"hi","number":7,"bool":false}`},
-			output:   []string{`hi:7:false`},
+			output:   []string{"hi:7:false"},
 		},
 		{
 			name:     "MultipleSelectedFieldsMultipleObjs",
@@ -97,15 +97,15 @@ func TestTransform(t *testing.T) {
 				`{"number":6.6,"bool":true,"string":"katz"}`,
 			},
 			output: []string{
-				`hi:7:false`,
-				`katz:6.6:true`,
+				"hi:7:false",
+				"katz:6.6:true",
 			},
 		},
 		{
 			name:     "MultipleSelectedFieldsWithOneMissing",
 			selector: ":string:number:missing:bool",
 			input:    []string{`{"string":"hi","number":7,"bool":false}`},
-			output:   []string{fmt.Sprintf(`hi:7:%s:false`, missingFieldErrMsg("missing"))},
+			output:   []string{fmt.Sprintf("hi:7:%s:false", missingFieldErrMsg("missing"))},
 		},
 		{
 			name:     "IncompletePathToField",
@@ -123,7 +123,7 @@ func TestTransform(t *testing.T) {
 			name:     "UnselectedFieldIsIgnored",
 			selector: ":number",
 			input:    []string{`{"number":666,"ignored":"hi"}`},
-			output:   []string{`666`},
+			output:   []string{"666"},
 		},
 		{
 			name:     "MissingField",
@@ -135,13 +135,13 @@ func TestTransform(t *testing.T) {
 			name:     "IgnoreSpacesOnBeginning",
 			selector: ":string",
 			input:    []string{` {"string":"lala"}`},
-			output:   []string{`lala`},
+			output:   []string{"lala"},
 		},
 		{
 			name:     "IgnoreTabsOnBeginning",
 			selector: ":string",
 			input: []string{`	{"string":"lala"}`},
-			output: []string{`lala`},
+			output: []string{"lala"},
 		},
 		{
 			name:     "IgnoreNewlinesOnBeginning",
@@ -149,7 +149,7 @@ func TestTransform(t *testing.T) {
 			input: []string{`
 				{"string":"lala"}`,
 			},
-			output: []string{`lala`},
+			output: []string{"lala"},
 		},
 	}
 
