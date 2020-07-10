@@ -65,21 +65,28 @@ func selectField(selector string, doc map[string]interface{}) string {
 	const accessOp = "."
 
 	fields := strings.Split(selector, accessOp)
+	pathFields := fields[0 : len(fields)-1]
+	finalField := fields[len(fields)-1]
 
-	fieldSelector := fields[0]
-	v, ok := doc[fieldSelector]
+	for _, pathField := range pathFields {
+		v, ok := doc[pathField]
+		if !ok {
+			return missingFieldErrMsg(selector)
+		}
+		// TODO: test cast failure
+		doc = v.(map[string]interface{})
+	}
 
+	v, ok := doc[finalField]
 	if !ok {
-		return fmt.Sprintf("<jtoh:missing field %q>", selector)
+		return missingFieldErrMsg(selector)
 	}
 
-	if len(fields) == 1 {
-		return fmt.Sprint(v)
-	}
+	return fmt.Sprint(v)
+}
 
-	// TODO: test cast failure
-	nestedObj := v.(map[string]interface{})
-	return selectField(strings.Join(fields[1:], accessOp), nestedObj)
+func missingFieldErrMsg(selector string) string {
+	return fmt.Sprintf("<jtoh:missing field %q>", selector)
 }
 
 func isList(jsons io.Reader) (io.Reader, bool) {
