@@ -50,6 +50,26 @@ func TestTransform(t *testing.T) {
 			input:    []string{`{"int":666,"ignored":"hi"}`},
 			output:   []string{`666`},
 		},
+		{
+			name:     "IgnoreSpacesOnBeginning",
+			selector: ":string",
+			input:    []string{` {"string":"lala"}`},
+			output:   []string{`lala`},
+		},
+		{
+			name:     "IgnoreTabsOnBeginning",
+			selector: ":string",
+			input: []string{`	{"string":"lala"}`},
+			output: []string{`lala`},
+		},
+		{
+			name:     "IgnoreNewlinesOnBeginning",
+			selector: ":string",
+			input: []string{`
+				{"string":"lala"}`,
+			},
+			output: []string{`lala`},
+		},
 	}
 
 	for i := range tests {

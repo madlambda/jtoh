@@ -53,6 +53,7 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 			// Will need some form of extended reader that remembers
 			// part of the read data (not all, don't want O(N) spatial
 			// complexity).
+			fmt.Printf("TODO:HANDLERR:%v\n", err)
 			return
 		}
 
@@ -79,10 +80,9 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 		}
 
 		firstToken := buf[0]
-		// TODO: Test space handling
-		//if isSpace(firstToken) {
-		//continue
-		//}
+		if isSpace(firstToken) {
+			continue
+		}
 
 		if firstToken == '[' {
 			return jsons, true
