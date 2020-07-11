@@ -49,6 +49,7 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 	dec := json.NewDecoder(jsonInput)
 
 	if ok {
+		// WHY: To handle properly gigantic lists of JSON objs
 		// Really don't need the return value, but linters can be annoying =P
 		_, _ = dec.Token()
 	}
