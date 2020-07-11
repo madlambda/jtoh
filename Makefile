@@ -2,7 +2,7 @@ version?=$(shell git rev-list -1 HEAD)
 cov=coverage.out
 covhtml=coverage.html
 
-all: build
+all: build test lint
 
 .PHONY: build
 build:

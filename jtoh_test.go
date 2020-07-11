@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -219,17 +218,6 @@ func testTransform(
 	if err := gotLines.Err(); err != nil {
 		t.Errorf("unexpected error scanning output lines: %v", err)
 	}
-}
-
-func readAll(t *testing.T, r io.Reader) string {
-	t.Helper()
-
-	v, err := ioutil.ReadAll(r)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return string(v)
 }
 
 func missingFieldErrMsg(selector string) string {

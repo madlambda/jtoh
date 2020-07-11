@@ -34,7 +34,7 @@ func New(selector string) (J, error) {
 	separator := string(selector[0])
 	return J{
 		separator:      separator,
-		fieldSelectors: strings.Split(string(selector[1:]), separator),
+		fieldSelectors: strings.Split(selector[1:], separator),
 	}, nil
 }
 
@@ -49,7 +49,8 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 	dec := json.NewDecoder(jsonInput)
 
 	if ok {
-		dec.Token()
+		// Really don't need the return value, but linters can be annoying =P
+		_, _ = dec.Token()
 	}
 
 	for dec.More() {
