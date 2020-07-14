@@ -17,6 +17,7 @@ import (
 // JSON List that has a list inside
 // Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
 // Spaces are trimmed on field accessors
+// Newlines on values are removed (or else we don't have single line stream of logs anymore)
 
 func TestTransform(t *testing.T) {
 	type Test struct {
