@@ -16,6 +16,7 @@ import (
 // JSON stream that has a list inside
 // JSON List that has a list inside
 // Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
+// Spaces are trimmed on field accessors
 
 func TestTransform(t *testing.T) {
 	type Test struct {

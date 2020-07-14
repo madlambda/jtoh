@@ -6,7 +6,7 @@ all: build test lint
 
 .PHONY: build
 build:
-	go build -i  -ldflags "-X main.Version=${version}" .
+	go build -i  -ldflags "-X main.Version=${version}" -o ./cmd/jtoh/jtoh ./cmd/jtoh
 
 .PHONY: lint
 lint:
