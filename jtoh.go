@@ -141,7 +141,6 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 }
 
 func isSpace(c byte) bool {
-	// TODO: test all this space handling
 	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
 }
 
