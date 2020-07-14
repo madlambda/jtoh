@@ -13,6 +13,11 @@ type J struct {
 	fieldSelectors []string
 }
 
+// Err is a jtoh error
+type Err string
+
+const InvalidSelectorErr Err = "invalid selector"
+
 // New creates a new jtoh transformer using the given selector.
 // The selector is on the form <separator><field selector 1><separator><field selector 2>
 // For example, given ":" as a separator you can define:
@@ -29,8 +34,10 @@ type J struct {
 // If the selector is invalid it returns an error.
 func New(selector string) (J, error) {
 	// TODO:
-	// - selector validation
 	// - handle non ascii selector
+	if len(selector) <= 1 {
+		return J{}, fmt.Errorf("%w:%s", InvalidSelectorErr, selector)
+	}
 	separator := string(selector[0])
 	return J{
 		separator:      separator,
@@ -137,4 +144,8 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 func isSpace(c byte) bool {
 	// TODO: test all this space handling
 	return c == ' ' || c == '\t' || c == '\r' || c == '\n'
+}
+
+func (e Err) Error() string {
+	return string(e)
 }

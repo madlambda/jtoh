@@ -17,7 +17,6 @@ import (
 // JSON List that has a list inside
 // Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
 // Selector is non-ascii char
-// Invalid selectors
 
 func TestTransform(t *testing.T) {
 	type Test struct {
@@ -30,6 +29,21 @@ func TestTransform(t *testing.T) {
 
 	tests := []Test{
 		{
+			name:     "ErrOnEmptySelector",
+			selector: "",
+			wantErr:  jtoh.InvalidSelectorErr,
+		},
+		{
+			name:     "ErrOnSelectorWithOnlySeparator",
+			selector: ":",
+			wantErr:  jtoh.InvalidSelectorErr,
+		},
+		{
+			name:     "ErrOnSelectorWithOnlyNonASCIISeparator",
+			selector: "λ",
+			wantErr:  jtoh.InvalidSelectorErr,
+		},
+		{
 			name:     "EmptyInput",
 			selector: ":field",
 			input:    []string{},
@@ -40,6 +54,12 @@ func TestTransform(t *testing.T) {
 			selector: ":string",
 			input:    []string{`{"string":"lala"}`},
 			output:   []string{"lala"},
+		},
+		{
+			name:     "SingleSelectStringFieldWithNonASCIISeparator",
+			selector: "λfieldλfieldb",
+			input:    []string{`{"field":"lala","fieldb":5}`},
+			output:   []string{"lalaλ5"},
 		},
 		{
 			name:     "SingleSelectNumberField",
@@ -181,7 +201,7 @@ func testTransform(
 
 	if wantErr != nil {
 		if !errors.Is(err, wantErr) {
-			t.Errorf("got err[%v] wanted[%v]", err, wantErr)
+			t.Errorf("got err[%v] want[%v]", err, wantErr)
 		}
 		return
 	}
