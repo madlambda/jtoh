@@ -32,16 +32,15 @@ const InvalidSelectorErr Err = "invalid selector"
 // as a separator since it is already a selector for nested fields.
 //
 // If the selector is invalid it returns an error.
-func New(selector string) (J, error) {
-	// TODO:
-	// - handle non ascii selector
+func New(s string) (J, error) {
+	selector := []rune(s)
 	if len(selector) <= 1 {
-		return J{}, fmt.Errorf("%w:%s", InvalidSelectorErr, selector)
+		return J{}, fmt.Errorf("%w:%s", InvalidSelectorErr, s)
 	}
 	separator := string(selector[0])
 	return J{
 		separator:      separator,
-		fieldSelectors: strings.Split(selector[1:], separator),
+		fieldSelectors: strings.Split(string(selector[1:]), separator),
 	}, nil
 }
 
