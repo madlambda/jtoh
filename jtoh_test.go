@@ -172,6 +172,12 @@ func TestTransform(t *testing.T) {
 			},
 			output: []string{"lala"},
 		},
+		{
+			name:     "FieldAccessorIsTrimmed",
+			selector: ": field :  field2  ",
+			input:    []string{`{"field":666, "field2":"lala"}`},
+			output:   []string{"666:lala"},
+		},
 	}
 
 	for i := range tests {

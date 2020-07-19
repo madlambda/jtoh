@@ -40,7 +40,7 @@ func New(s string) (J, error) {
 	separator := string(selector[0])
 	return J{
 		separator:      separator,
-		fieldSelectors: strings.Split(string(selector[1:]), separator),
+		fieldSelectors: trimSpaces(strings.Split(string(selector[1:]), separator)),
 	}, nil
 }
 
@@ -146,4 +146,12 @@ func isSpace(c byte) bool {
 
 func (e Err) Error() string {
 	return string(e)
+}
+
+func trimSpaces(s []string) []string {
+	trimmed := make([]string, len(s))
+	for i, v := range s {
+		trimmed[i] = strings.TrimSpace(v)
+	}
+	return trimmed
 }
