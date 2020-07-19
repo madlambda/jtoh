@@ -104,7 +104,7 @@ func selectField(selector string, obj map[string]interface{}) string {
 		return missingFieldErrMsg(selector)
 	}
 
-	return fmt.Sprint(v)
+	return strings.Trim(fmt.Sprint(v), "\n")
 }
 
 func missingFieldErrMsg(selector string) string {

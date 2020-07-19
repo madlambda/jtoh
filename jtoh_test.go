@@ -16,7 +16,6 @@ import (
 // JSON stream that has a list inside
 // JSON List that has a list inside
 // Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
-// Spaces are trimmed on field accessors
 // Newlines on values are removed (or else we don't have single line stream of logs anymore)
 
 func TestTransform(t *testing.T) {
@@ -192,6 +191,15 @@ func TestTransform(t *testing.T) {
 			selector: ": nested field.field with space : field ",
 			input:    []string{`{"nested field" : { "field with space":666 }, "field":"stonks"}`},
 			output:   []string{"666:stonks"},
+		},
+		{
+			name:     "TrailingNewlinesOnValuesAreTrimmed",
+			selector: ":field",
+			input: []string{
+				"{\"field\":\"\\nvalue1\\n\\n\"}",
+				"{\"field\":\"\\nvalue2\"}",
+			},
+			output: []string{"value1", "value2"},
 		},
 	}
 
