@@ -178,6 +178,18 @@ func TestTransform(t *testing.T) {
 			input:    []string{`{"field":666, "field2":"lala"}`},
 			output:   []string{"666:lala"},
 		},
+		{
+			name:     "FieldAccessorCanHaveSpaces",
+			selector: ": field with space : field ",
+			input:    []string{`{"field with space":666, "field":"stonks"}`},
+			output:   []string{"666:stonks"},
+		},
+		{
+			name:     "NestedFieldAccessorCanHaveSpaces",
+			selector: ": nested field.field with space : field ",
+			input:    []string{`{"nested field" : { "field with space":666 }, "field":"stonks"}`},
+			output:   []string{"666:stonks"},
+		},
 	}
 
 	for i := range tests {
