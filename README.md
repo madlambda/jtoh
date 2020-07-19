@@ -7,39 +7,54 @@ stack driver. But it will work with any long list/stream of JSON objects.
 
 # Why ?
 
- There is some good tools to parse JSON, like
- [jq](https://stedolan.github.io/jq/manual), which I usually use.
- But my problem involved processing long lists of JSON documents,
- like this (but much bigger):
- 
- ```json
- [
-		{"Name": "Ed", "Text": "Knock knock."},
-		{"Name": "Sam", "Text": "Who's there?"},
-		{"Name": "Ed", "Text": "Go fmt."},
-		{"Name": "Sam", "Text": "Go fmt who?"},
-		{"Name": "Ed", "Text": "Go fmt yourself!"}
-	]
- ```
- 
- And jq by default does no stream processing, and the stream mode is not
- exactly what I want as can be seen on the
- [docs](https://stedolan.github.io/jq/manual/#Streaming) and on this
- [post](https://devblog.songkick.com/parsing-ginormous-json-files-via-streaming-be6561ea8671).
- To be honest I can't even understand the documentation on how jq streaming
- works, so even if it is useful for some scenarios it is beyond me to
- understand it properly (and what I read on the blog post does
- not sound like fun).
- 
- The behavior that I wanted is the exact same behavior as
- Go's [json.Decoder.Decode](https://golang.org/pkg/encoding/json/#Decoder.Decode),
- which is to handle JSON lists as an incremental decoding of each JSON document
- inside the list, done in a streaming fashion, hence this tool was built
- (and using Go =P). But it is NOT a replacement for jq with streaming
- capabilities because it focuses on just projecting a few fields from JSON
- documents in a newline oriented fashion, there is no filtering or any advanced
- features (it is mainly a JSON structured log analyzer).
- 
+There is some good tools to parse JSON, like
+[jq](https://stedolan.github.io/jq/manual), which I usually use.
+But my problem involved processing long lists of JSON documents,
+like this (but much bigger):
+
+```json
+[
+            {"Name": "Ed", "Text": "Knock knock."},
+            {"Name": "Sam", "Text": "Who's there?"},
+            {"Name": "Ed", "Text": "Go fmt."},
+            {"Name": "Sam", "Text": "Go fmt who?"},
+            {"Name": "Ed", "Text": "Go fmt yourself!"}
+    ]
+```
+
+And jq by default does no stream processing, and the stream mode is not
+exactly what I want as can be seen on the
+[docs](https://stedolan.github.io/jq/manual/#Streaming) and on this
+[post](https://devblog.songkick.com/parsing-ginormous-json-files-via-streaming-be6561ea8671).
+To be honest I can't even understand the documentation on how jq streaming
+works, so even if it is useful for some scenarios it is beyond me to
+understand it properly (and what I read on the blog post does
+not sound like fun).
+
+The behavior that I wanted is the exact same behavior as
+Go's [json.Decoder.Decode](https://golang.org/pkg/encoding/json/#Decoder.Decode),
+which is to handle JSON lists as an incremental decoding of each JSON document
+inside the list, done in a streaming fashion, hence this tool was built
+(and using Go =P). But it is NOT a replacement for jq with streaming
+capabilities because it focuses on just projecting a few fields from JSON
+documents in a newline oriented fashion, there is no filtering or any advanced
+features and it probably won't handle well complex scenarios, it is meant
+for long lists of JSON objects or long streams of JSON objects.
+
+# Install
+
+To install it you will need Go >= 1.13. You can clone the repository and run:
+
+```
+make install
+```
+
+Or you can just run:
+
+```
+go install -i github.com/katcipis/jtoh/cmd/jtoh
+```
+
 # What
  
 jtoh will produce a newline for each JSON document found on the list/stream,
@@ -68,7 +83,7 @@ data1:data2
 A more hands on example, lets say you are getting the logs for a specific
 application on GCP like this:
 
-```
+```sh
 gcloud logging read --format=json --project <your project> "severity>=WARNING AND resource.labels.container_name=myapp"
 ```
 
