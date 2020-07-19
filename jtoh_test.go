@@ -173,7 +173,10 @@ func TestTransform(t *testing.T) {
 			output: []string{"lala"},
 		},
 		{
-			name:     "FieldAccessorIsTrimmed",
+			// Not entirely sure that trimming is the way to go in this case
+			// But it seems pretty odd to have a json key with trailing spaces
+			// And at the same time it would be valid JSON
+			name:     "FieldAccessorTrailingSpacesAreTrimmed",
 			selector: ": field :  field2  ",
 			input:    []string{`{"field":666, "field2":"lala"}`},
 			output:   []string{"666:lala"},
