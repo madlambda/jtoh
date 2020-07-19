@@ -16,7 +16,6 @@ import (
 // JSON stream that has a list inside
 // JSON List that has a list inside
 // Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
-// Newlines on values are removed (or else we don't have single line stream of logs anymore)
 
 func TestTransform(t *testing.T) {
 	type Test struct {
@@ -209,6 +208,15 @@ func TestTransform(t *testing.T) {
 				`{"field":"    stonks 2   "}`,
 			},
 			output: []string{"stonks", "stonks 2"},
+		},
+		{
+			name:     "NewlinesInsideValuesWillBePreserved",
+			selector: ":field",
+			input: []string{
+				"{\"field\":\"BeforeNewline\\nAfterNewline\"}",
+				"{\"field\":\"value2\"}",
+			},
+			output: []string{"BeforeNewline", "AfterNewline", "value2"},
 		},
 	}
 
