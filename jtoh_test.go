@@ -201,6 +201,15 @@ func TestTransform(t *testing.T) {
 			},
 			output: []string{"value1", "value2"},
 		},
+		{
+			name:     "TrailingSpacesOnValuesAreTrimmed",
+			selector: ":field",
+			input: []string{
+				`{"field":" stonks "}`,
+				`{"field":"    stonks 2   "}`,
+			},
+			output: []string{"stonks", "stonks 2"},
+		},
 	}
 
 	for i := range tests {
