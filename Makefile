@@ -1,12 +1,13 @@
 version?=$(shell git rev-list -1 HEAD)
 cov=coverage.out
 covhtml=coverage.html
+buildflags=-ldflags "-X main.Version=${version}"
 
 all: build test lint
 
 .PHONY: build
 build:
-	go build -i  -ldflags "-X main.Version=${version}" -o ./cmd/jtoh/jtoh ./cmd/jtoh
+	go build -i  $(buildflags) -o ./cmd/jtoh/jtoh ./cmd/jtoh
 
 .PHONY: lint
 lint:
@@ -22,3 +23,7 @@ test:
 .PHONY: coverage
 coverage: test
 	go tool cover -html=$(cov) -o=$(covhtml)
+
+.PHONY: install
+install:
+	go install $(buildflags) ./cmd/jtoh
