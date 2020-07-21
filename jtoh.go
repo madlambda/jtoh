@@ -13,9 +13,10 @@ type J struct {
 	fieldSelectors []string
 }
 
-// Err is a jtoh error
+// Err is an exported jtoh error
 type Err string
 
+// InvalidSelectorErr represents errors with the provided fields selector
 const InvalidSelectorErr Err = "invalid selector"
 
 // New creates a new jtoh transformer using the given selector.

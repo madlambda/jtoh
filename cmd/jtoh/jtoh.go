@@ -7,6 +7,7 @@ import (
 	"github.com/katcipis/jtoh"
 )
 
+// Version of the code used to build the jtoh tool
 var Version = ""
 
 func main() {
