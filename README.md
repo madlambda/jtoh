@@ -1,5 +1,7 @@
 # jtoh
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/katcipis/jtoh)](https://goreportcard.com/report/github.com/katcipis/jtoh)
+
 jtoh stands for JSON To Human, basically makes it easier to analyze long
 streams of JSON objects.
 The main use case is to analyze structured logs from Kubernetes and GCP
