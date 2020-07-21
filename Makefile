@@ -15,7 +15,6 @@ lint:
 	    --enable=unparam --enable=unconvert --enable=dupl --enable=gofmt \
 	    --enable=stylecheck --enable=scopelint --enable=nakedret --enable=misspell \
 	    --enable=goconst --enable=dogsled --enable=bodyclose --enable=whitespace --enable=golint
-	golint ./...
 
 .PHONY: test
 test:
