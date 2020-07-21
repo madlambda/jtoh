@@ -275,7 +275,7 @@ func testTransform(
 		if gotLine != wantLine {
 			t.Errorf("line[%d]: got %q != want %q", lineCount, gotLine, wantLine)
 		}
-		lineCount += 1
+		lineCount++
 	}
 
 	if lineCount != len(want) {
