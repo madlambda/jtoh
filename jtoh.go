@@ -25,7 +25,7 @@ const InvalidSelectorErr Err = "invalid selector"
 //
 // :fieldA:fieldB:fieldC
 //
-// Accessing a nested field is done with dot notation, like this:
+// Accessing a nested field is done with dot to access nested fields, like this:
 //
 // :field.nested
 //
@@ -39,6 +39,9 @@ func New(s string) (J, error) {
 		return J{}, fmt.Errorf("%w:%s", InvalidSelectorErr, s)
 	}
 	separator := string(selector[0])
+	if separator == "." {
+		return J{}, fmt.Errorf("%w:can't use '.' as separator", InvalidSelectorErr)
+	}
 	return J{
 		separator:      separator,
 		fieldSelectors: trimSpaces(strings.Split(string(selector[1:]), separator)),

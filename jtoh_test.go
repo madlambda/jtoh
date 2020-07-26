@@ -33,6 +33,11 @@ func TestTransform(t *testing.T) {
 			wantErr:  jtoh.InvalidSelectorErr,
 		},
 		{
+			name:     "ErrOnDotSelector",
+			selector: ".field",
+			wantErr:  jtoh.InvalidSelectorErr,
+		},
+		{
 			name:     "ErrOnSelectorWithOnlySeparator",
 			selector: ":",
 			wantErr:  jtoh.InvalidSelectorErr,
