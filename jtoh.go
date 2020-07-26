@@ -120,10 +120,24 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 
 	// WHY: was unable to find something like peek on json Decoder
 	for {
-		_, err := jsons.Read(buf)
+		n, err := jsons.Read(buf)
 		if err != nil {
 			// FIXME: Probably would be better to fail here with a more clear error =P
 			return jsons, false
+		}
+		if n == 0 {
+			// From the docs:
+			//
+			// https://golang.org/pkg/io/#Reader
+			//
+			// Implementations of Read are discouraged from
+			// returning a zero byte count with a nil error,
+			// except when len(p) == 0. Callers should treat a
+			// return of 0 and nil as indicating that nothing happened;
+			// in particular it does not indicate EOF.
+			//
+			// Hope it doesn't result in some infinite loop =/
+			continue
 		}
 
 		firstToken := buf[0]
