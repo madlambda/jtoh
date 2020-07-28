@@ -260,17 +260,31 @@ func TestTransform(t *testing.T) {
 				"Just some plain text mixed among JSON",
 			},
 		},
+		{
+			name:     "IfNothingIsValidJSONAllDataIsEchoed",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"stonks",
+				"hello",
+			},
+			output: []string{
+				"whatever",
+				"stonks",
+				"hello",
+			},
+		},
 	}
 
 	for i := range tests {
 		test := tests[i]
 
-		t.Run(test.name+"WithList", func(t *testing.T) {
+		t.Run(test.name+"ParsingList", func(t *testing.T) {
 			input := strings.NewReader("[" + strings.Join(test.input, ",") + "]")
 			testTransform(t, input, test.selector, test.output, test.wantErr)
 		})
 
-		t.Run(test.name+"WithStream", func(t *testing.T) {
+		t.Run(test.name+"ParsingStream", func(t *testing.T) {
 			input := strings.NewReader(strings.Join(test.input, "\n"))
 			testTransform(t, input, test.selector, test.output, test.wantErr)
 		})
