@@ -60,7 +60,7 @@ go install -i github.com/katcipis/jtoh/cmd/jtoh
 # What
  
 jtoh will produce a newline for each JSON document found on the list/stream,
-accepting a projection string as a parameter indicating which fields are going
+accepting a selector string as a parameter indicating which fields are going
 to be used to compose each newline and what is the separator between each field:
  
 ```
@@ -68,14 +68,14 @@ to be used to compose each newline and what is the separator between each field:
 ```
 
 Where **<sep>** is the first character and will be considered the separator,
-it is used to separate different field definitions and will also be used
+it is used to separate different field selectors and will also be used
 as the separator on the output, this:
 
 ```
 <source of JSON list> | jtoh ":field1:field2"
 ```
 
-Will generate an stream of outputs like:
+Will generate an stream of outputs like this:
 
 ```
 data1:data2
@@ -117,11 +117,10 @@ You will probably have a long list of something like this:
 }
 ```
 
-In this case the application does no JSON structured logging
-(which is perfectly fine in some scenarios),
-but there is a lot of data around the
+In this case the application does no JSON structured logging,
+there is a lot of data around the
 actual application log that can be useful for filtering but after
-being used for filtering is pure cognitive noise.
+being used for filtering it is pure cognitive noise.
 
 Using jtoh like this:
 
