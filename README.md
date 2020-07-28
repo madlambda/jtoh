@@ -140,5 +140,18 @@ get when the application structure the log entries as JSON and you get the
 logs directly from Kubernetes using kubectl like this:
 
 ```
-TODO
+TODO: Kubernetes examples :-)
 ```
+
+# Error Handling
+
+One thing that makes jtoh very different than usual JSON parsing tools is
+how it handles errors. Anything that is not JSON will be just echoed back
+and it will keep trying to parse the rest of the data.
+
+The idea is to cover scenarios where application have hybrid logs, where
+sometimes it is JSON and sometimes it is just a stack trace or something
+else. These scenarios are not ideal, the software should be fixed, but
+life is not ideal, so if you are in this situation jtoh may help you
+analyze the logs :-) (and hopefully in time you will also fix the logs
+so they become uniform/consistent).
