@@ -15,7 +15,6 @@ import (
 // TODO:
 // JSON stream that has a list inside
 // JSON List that has a list inside
-// Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
 
 func TestTransform(t *testing.T) {
 	type Test struct {
@@ -178,7 +177,7 @@ func TestTransform(t *testing.T) {
 		{
 			// Not entirely sure that trimming is the way to go in this case
 			// But it seems pretty odd to have a json key with trailing spaces
-			// And at the same time it would be valid JSON
+			// But it would be valid JSON...
 			name:     "FieldAccessorTrailingSpacesAreTrimmed",
 			selector: ": field :  field2  ",
 			input:    []string{`{"field":666, "field2":"lala"}`},
@@ -222,6 +221,44 @@ func TestTransform(t *testing.T) {
 				"{\"field\":\"value2\"}",
 			},
 			output: []string{"BeforeNewline", "AfterNewline", "value2"},
+		},
+		{
+			name:     "IfFirstItemIsNotJSONItIsEchoed",
+			selector: ":field",
+			input: []string{
+				`Just some plain text mixed among JSON`,
+				`{"field":"stonks"}`,
+			},
+			output: []string{
+				"Just some plain text mixed among JSON",
+				"stonks",
+			},
+		},
+		{
+			name:     "NonJSONOnMiddleOfValidJSONObjsIsEchoed",
+			selector: ":field",
+			input: []string{
+				`{"field":"stonks"}`,
+				`Just some plain text mixed among JSON`,
+				`{"field":"stonks2"}`,
+			},
+			output: []string{
+				"stonks",
+				"Just some plain text mixed among JSON",
+				"stonks2",
+			},
+		},
+		{
+			name:     "IfLastItemIsNotJSONItIsEchoed",
+			selector: ":field",
+			input: []string{
+				`{"field":"stonks"}`,
+				`Just some plain text mixed among JSON`,
+			},
+			output: []string{
+				"stonks",
+				"Just some plain text mixed among JSON",
+			},
 		},
 	}
 
