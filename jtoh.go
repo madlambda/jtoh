@@ -73,12 +73,8 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 		m := map[string]interface{}{}
 		err := dec.Decode(&m)
 		if err != nil {
-			// TODO: handle non disruptive parse errors
-			// Ideally we want the original non-JSON data
-			// Will need some form of extended reader that remembers
-			// part of the read data (not all, don't want O(N) spatial
-			// complexity).
-			fmt.Fprint(textOutput, bufinput.bytes())
+			// TODO: handle write errors
+			textOutput.Write(bufinput.bytes())
 			return
 		}
 
