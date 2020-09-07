@@ -50,18 +50,14 @@ func New(s string) (J, error) {
 }
 
 // Do receives a json stream as input and transforms it
-// in simple lines of text (newline-delimited) which is
+// in lines of text (newline-delimited) which is
 // then written in the provided writer.
 //
 // This function will block until all data is read from the input
 // and written on the output.
-func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
+func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 	jsonInput, ok := isList(jsonInput)
-	// Why not bufio ? what we need here is kinda like
-	// buffered io, but not exactly the same (was not able to
-	// come up with a better name to it).
-	bufinput := bufferedReader{r: jsonInput}
-	dec := json.NewDecoder(&bufinput)
+	dec := json.NewDecoder(jsonInput)
 
 	if ok {
 		// WHY: To handle properly gigantic lists of JSON objs
@@ -73,17 +69,16 @@ func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
 		m := map[string]interface{}{}
 		err := dec.Decode(&m)
 		if err != nil {
+			// TODO: get data that produced decode error
 			// TODO: handle write errors
-			textOutput.Write(bufinput.bytes())
 			return
 		}
 
-		bufinput.reset()
 		fieldValues := make([]string, len(j.fieldSelectors))
 		for i, fieldSelector := range j.fieldSelectors {
 			fieldValues[i] = selectField(fieldSelector, m)
 		}
-		fmt.Fprint(textOutput, strings.Join(fieldValues, j.separator)+"\n")
+		fmt.Fprint(linesOutput, strings.Join(fieldValues, j.separator)+"\n")
 	}
 }
 
@@ -147,16 +142,8 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 			continue
 		}
 
-		if firstToken == '[' {
-			return io.MultiReader(strings.NewReader("["), jsons), true
-		}
-
-		if firstToken == '{' {
-			return io.MultiReader(strings.NewReader("{"), jsons), false
-		}
-
-		// FIXME: Probably would be better to fail here with a more clear error =P
-		return jsons, false
+		isList := firstToken == '['
+		return io.MultiReader(bytes.NewBuffer([]byte{firstToken}), jsons), isList
 	}
 }
 
@@ -174,31 +161,4 @@ func trimSpaces(s []string) []string {
 		trimmed[i] = strings.TrimSpace(v)
 	}
 	return trimmed
-}
-
-// bufferedReader is not exactly like the bufio on stdlib.
-// The idea is to use it as a means to buffer read data
-// until reset or bytes are called. We need this so when
-// the JSON decoder finds an error in the stream we can retrieve
-// exactly how much has been read between the last successful
-// decode and the current error and echo it.
-type bufferedReader struct {
-	r   io.Reader
-	buf bytes.Buffer
-}
-
-func (b *bufferedReader) Read(data []byte) (int, error) {
-	n, err := b.r.Read(data)
-	// By design it is safe to ignore buffer Write error (it never fails, only panics)
-	b.buf.Write(data[:n])
-	return n, err
-}
-
-func (b *bufferedReader) bytes() []byte {
-	defer b.reset()
-	return b.buf.Bytes()
-}
-
-func (b *bufferedReader) reset() {
-	b.buf.Reset()
 }
