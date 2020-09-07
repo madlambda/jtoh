@@ -57,7 +57,11 @@ func New(s string) (J, error) {
 // and written on the output.
 func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 	jsonInput, ok := isList(jsonInput)
-	dec := json.NewDecoder(jsonInput)
+	// Why not bufio ? what we need here is kinda like
+	// buffered io, but not exactly the same (was not able to
+	// come up with a better name to it).
+	bufinput := bufferedReader{r: jsonInput}
+	dec := json.NewDecoder(&bufinput)
 
 	if ok {
 		// WHY: To handle properly gigantic lists of JSON objs
@@ -68,12 +72,20 @@ func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 	for dec.More() {
 		m := map[string]interface{}{}
 		err := dec.Decode(&m)
+		bufinput.updateOffset(dec.InputOffset())
+
 		if err != nil {
-			// TODO: get data that produced decode error
+			fmt.Println(dec.InputOffset())
+			fmt.Println(err)
 			// TODO: handle write errors
+			linesOutput.Write(bufinput.bytes())
+			bufinput.reset()
+			// TODO: we need to continue decoding in face of an error
+			// but go decoder stops as soon as it finds an error
 			return
 		}
 
+		bufinput.reset()
 		fieldValues := make([]string, len(j.fieldSelectors))
 		for i, fieldSelector := range j.fieldSelectors {
 			fieldValues[i] = selectField(fieldSelector, m)
@@ -161,4 +173,39 @@ func trimSpaces(s []string) []string {
 		trimmed[i] = strings.TrimSpace(v)
 	}
 	return trimmed
+}
+
+// bufferedReader is not exactly like the bufio on stdlib.
+// The idea is to use it as a means to buffer read data
+// until reset. We need this so when
+// the JSON decoder finds an error in the stream we can retrieve
+// exactly how much has been read between the last successful
+// decode and the current error and echo it.
+type bufferedReader struct {
+	r          io.Reader
+	buf        bytes.Buffer
+	prevOffset int64
+	curOffset  int64
+}
+
+func (b *bufferedReader) Read(data []byte) (int, error) {
+	n, err := b.r.Read(data)
+	// By design it is safe to ignore buffer Write error (it never fails, only panics)
+	b.buf.Write(data[:n])
+	return n, err
+}
+
+func (b *bufferedReader) updateOffset(offset int64) {
+	b.prevOffset = b.curOffset
+	b.curOffset = offset
+}
+
+func (b *bufferedReader) bytes() []byte {
+	// TODO: make it work without holding everything in memory
+	return b.buf.Bytes()[b.prevOffset : b.curOffset+1]
+}
+
+func (b *bufferedReader) reset() {
+	// TODO: make it work without holding everything in memory
+	//b.buf.Reset()
 }
