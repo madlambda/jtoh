@@ -72,26 +72,31 @@ func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 
 	var errBuffer []byte
 
-	for dec.More() {
-		m := map[string]interface{}{}
-		err := dec.Decode(&m)
-		dataUsedOnDecode := bufinput.readBuffer()
-		bufinput.reset()
+	// TODO: Right now we have space complexity O(N) when the input is not JSON
+	// For huge chunks of non JSON data this may be a problem
+	for bufinput.hasData() {
+		for dec.More() {
+			m := map[string]interface{}{}
+			err := dec.Decode(&m)
+			dataUsedOnDecode := bufinput.readBuffer()
+			bufinput.reset()
 
-		if err != nil {
-			errBuffer = append(errBuffer, dataUsedOnDecode...)
-			dec = json.NewDecoder(&bufinput)
-			continue
+			if err != nil {
+				errBuffer = append(errBuffer, dataUsedOnDecode...)
+				dec = json.NewDecoder(&bufinput)
+				continue
+			}
+
+			writeErrs(linesOutput, errBuffer)
+			errBuffer = nil
+
+			fieldValues := make([]string, len(j.fieldSelectors))
+			for i, fieldSelector := range j.fieldSelectors {
+				fieldValues[i] = selectField(fieldSelector, m)
+			}
+			fmt.Fprint(linesOutput, strings.Join(fieldValues, j.separator)+"\n")
 		}
-
-		writeErrs(linesOutput, errBuffer)
-		errBuffer = nil
-
-		fieldValues := make([]string, len(j.fieldSelectors))
-		for i, fieldSelector := range j.fieldSelectors {
-			fieldValues[i] = selectField(fieldSelector, m)
-		}
-		fmt.Fprint(linesOutput, strings.Join(fieldValues, j.separator)+"\n")
+		dec = json.NewDecoder(&bufinput)
 	}
 
 	writeErrs(linesOutput, errBuffer)
@@ -202,8 +207,9 @@ func trimSpaces(s []string) []string {
 // an error occurs on the json decoder we have the exact byte stream that
 // caused the error (I would welcome with open arms a better solution x_x).
 type bufferedReader struct {
-	r      io.Reader
-	buffer []byte
+	r       io.Reader
+	buffer  []byte
+	readErr error
 }
 
 func (b *bufferedReader) Read(data []byte) (int, error) {
@@ -214,11 +220,17 @@ func (b *bufferedReader) Read(data []byte) (int, error) {
 	data = data[:1]
 	n, err := b.r.Read(data)
 
+	b.readErr = err
+
 	if n > 0 {
 		b.buffer = append(b.buffer, data[0])
 	}
 
 	return n, err
+}
+
+func (b *bufferedReader) hasData() bool {
+	return b.readErr == nil
 }
 
 func (b *bufferedReader) readBuffer() []byte {
