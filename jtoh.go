@@ -97,17 +97,35 @@ func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 }
 
 func writeErrs(w io.Writer, errBuffer []byte) {
-	if len(errBuffer) > 0 {
-		// TODO: handle write errors
-		if errBuffer[0] == '\n' {
-			// Remove just the first \n since it is added
-			// because the newline after a valid document.
-			// Further newlines added on the output will be echoed.
-			errBuffer = errBuffer[1:]
-		}
-		errBuffer = append(errBuffer, '\n')
-		w.Write(errBuffer)
+	if len(errBuffer) == 0 {
+		return
 	}
+
+	// TODO: only do this in streaming mode
+	if errBuffer[0] == '\n' {
+		// Remove just the first \n since it is added
+		// because the newline after a valid document.
+		// Further newlines added on the output will be echoed.
+		errBuffer = errBuffer[1:]
+	}
+
+	// TODO: only do this in list mode
+	if errBuffer[0] == '[' || errBuffer[0] == ',' {
+		// Remove just the first [ since it is added
+		// because the beginning of a list with an element that is not a document.
+		errBuffer = errBuffer[1:]
+	}
+	lastIndex := len(errBuffer) - 1
+	if errBuffer[lastIndex] == ',' {
+		// Remove just the last comma since it is added
+		// because of the , on a JSON list after a invalid document.
+		// Further commas added on the output will be echoed.
+		errBuffer = errBuffer[:lastIndex]
+	}
+
+	errBuffer = append(errBuffer, '\n')
+	// TODO: handle write errors
+	w.Write(errBuffer)
 }
 
 func selectField(selector string, obj map[string]interface{}) string {
