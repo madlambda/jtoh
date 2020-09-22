@@ -69,28 +69,44 @@ func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 		_, _ = dec.Token()
 	}
 
+	var errBuffer []byte
+
 	for dec.More() {
 		m := map[string]interface{}{}
 		err := dec.Decode(&m)
-		bufinput.updateOffset(dec.InputOffset())
+		dataUsedOnDecode := bufinput.readBuffer()
+		bufinput.reset()
 
 		if err != nil {
-			fmt.Println(dec.InputOffset())
-			fmt.Println(err)
-			// TODO: handle write errors
-			linesOutput.Write(bufinput.bytes())
-			bufinput.reset()
-			// TODO: we need to continue decoding in face of an error
-			// but go decoder stops as soon as it finds an error
-			return
+			errBuffer = append(errBuffer, dataUsedOnDecode...)
+			dec = json.NewDecoder(&bufinput)
+			continue
 		}
 
-		bufinput.reset()
+		writeErrs(linesOutput, errBuffer)
+		errBuffer = nil
+
 		fieldValues := make([]string, len(j.fieldSelectors))
 		for i, fieldSelector := range j.fieldSelectors {
 			fieldValues[i] = selectField(fieldSelector, m)
 		}
 		fmt.Fprint(linesOutput, strings.Join(fieldValues, j.separator)+"\n")
+	}
+
+	writeErrs(linesOutput, errBuffer)
+}
+
+func writeErrs(w io.Writer, errBuffer []byte) {
+	if len(errBuffer) > 0 {
+		// TODO: handle write errors
+		if errBuffer[0] == '\n' {
+			// Remove just the first \n since it is added
+			// because the newline after a valid document.
+			// Further newlines added on the output will be echoed.
+			errBuffer = errBuffer[1:]
+		}
+		errBuffer = append(errBuffer, '\n')
+		w.Write(errBuffer)
 	}
 }
 
@@ -177,35 +193,40 @@ func trimSpaces(s []string) []string {
 
 // bufferedReader is not exactly like the bufio on stdlib.
 // The idea is to use it as a means to buffer read data
-// until reset. We need this so when
+// until reset is called. We need this so when
 // the JSON decoder finds an error in the stream we can retrieve
 // exactly how much has been read between the last successful
 // decode and the current error and echo it.
+//
+// To guarantee that we provide data byte per byte, which is
+// not terribly efficient but was the only way so far to be sure
+// (assuming that the json decoder does no lookahead) that when
+// an error occurs on the json decoder we have the exact byte stream that
+// caused the error (I would welcome with open arms a better solution x_x).
 type bufferedReader struct {
-	r          io.Reader
-	buf        bytes.Buffer
-	prevOffset int64
-	curOffset  int64
+	r      io.Reader
+	buffer []byte
 }
 
 func (b *bufferedReader) Read(data []byte) (int, error) {
+	if len(data) == 0 {
+		return 0, nil
+	}
+
+	data = data[:1]
 	n, err := b.r.Read(data)
-	// By design it is safe to ignore buffer Write error (it never fails, only panics)
-	b.buf.Write(data[:n])
+
+	if n > 0 {
+		b.buffer = append(b.buffer, data[0])
+	}
+
 	return n, err
 }
 
-func (b *bufferedReader) updateOffset(offset int64) {
-	b.prevOffset = b.curOffset
-	b.curOffset = offset
-}
-
-func (b *bufferedReader) bytes() []byte {
-	// TODO: make it work without holding everything in memory
-	return b.buf.Bytes()[b.prevOffset : b.curOffset+1]
+func (b *bufferedReader) readBuffer() []byte {
+	return b.buffer
 }
 
 func (b *bufferedReader) reset() {
-	// TODO: make it work without holding everything in memory
-	//b.buf.Reset()
+	b.buffer = make([]byte, 0, 1024)
 }
