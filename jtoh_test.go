@@ -231,8 +231,12 @@ func TestTransform(t *testing.T) {
 				`Just some plain text mixed among JSON`,
 				`{"field":"stonks"}`,
 			},
-			output: []string{
+			streamOutput: []string{
 				"Just some plain text mixed among JSON",
+				"stonks",
+			},
+			listOutput: []string{
+				"[Just some plain text mixed among JSON,",
 				"stonks",
 			},
 		},
@@ -244,9 +248,15 @@ func TestTransform(t *testing.T) {
 				`Just some plain text mixed among JSON`,
 				`{"field":"stonks2"}`,
 			},
-			output: []string{
+			streamOutput: []string{
 				"stonks",
+				"",
 				"Just some plain text mixed among JSON",
+				"stonks2",
+			},
+			listOutput: []string{
+				"stonks",
+				",Just some plain text mixed among JSON,",
 				"stonks2",
 			},
 		},
@@ -257,9 +267,14 @@ func TestTransform(t *testing.T) {
 				`{"field":"stonks"}`,
 				`Just some plain text mixed among JSON`,
 			},
-			output: []string{
+			streamOutput: []string{
 				"stonks",
+				"",
 				"Just some plain text mixed among JSON",
+			},
+			listOutput: []string{
+				"stonks",
+				",Just some plain text mixed among JSON",
 			},
 		},
 		{
@@ -276,7 +291,7 @@ func TestTransform(t *testing.T) {
 				"hello",
 			},
 			listOutput: []string{
-				"whatever,stonks,hello",
+				"[whatever,stonks,hello",
 			},
 		},
 	}
