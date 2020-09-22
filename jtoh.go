@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -125,7 +126,10 @@ func writeErrs(w io.Writer, errBuffer []byte) {
 
 	errBuffer = append(errBuffer, '\n')
 	// TODO: handle write errors
-	w.Write(errBuffer)
+	n, err := w.Write(errBuffer)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "jtoh:error writing error buffer: wrote %d bytes, details: %v\n", n, err)
+	}
 }
 
 func selectField(selector string, obj map[string]interface{}) string {
