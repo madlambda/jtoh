@@ -294,6 +294,40 @@ func TestTransform(t *testing.T) {
 				"[whatever,stonks,hello",
 			},
 		},
+		{
+			name:     "EchoesCorrectlyDataThatLooksLikeListEnd",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"hi]",
+				"hello",
+			},
+			streamOutput: []string{
+				"whatever",
+				"hi]",
+				"hello",
+			},
+			listOutput: []string{
+				"[whatever,hi],hello",
+			},
+		},
+		{
+			name:     "EchoesCorrectlyDataThatLooksLikeObjEnd",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"hi}",
+				"hello",
+			},
+			streamOutput: []string{
+				"whatever",
+				"hi}",
+				"hello",
+			},
+			listOutput: []string{
+				"[whatever,hi},hello",
+			},
+		},
 	}
 
 	for i := range tests {

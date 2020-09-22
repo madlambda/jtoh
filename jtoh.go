@@ -101,9 +101,7 @@ func writeErrs(w io.Writer, errBuffer []byte) {
 	if len(errBuffer) == 0 {
 		return
 	}
-
 	errBuffer = append(errBuffer, '\n')
-	// TODO: handle write errors
 	n, err := w.Write(errBuffer)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "jtoh:error writing error buffer: wrote %d bytes, details: %v\n", n, err)
