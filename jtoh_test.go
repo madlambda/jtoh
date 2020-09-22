@@ -12,10 +12,6 @@ import (
 	"github.com/katcipis/jtoh"
 )
 
-// TODO:
-// JSON stream that has a list inside
-// JSON List that has a list inside
-
 func TestTransform(t *testing.T) {
 	type Test struct {
 		name         string
@@ -236,7 +232,7 @@ func TestTransform(t *testing.T) {
 				"stonks",
 			},
 			listOutput: []string{
-				"[Just some plain text mixed among JSON,",
+				"Just some plain text mixed among JSON,",
 				"stonks",
 			},
 		},
@@ -291,7 +287,7 @@ func TestTransform(t *testing.T) {
 				"hello",
 			},
 			listOutput: []string{
-				"[whatever,stonks,hello",
+				"whatever,stonks,hello",
 			},
 		},
 		{
@@ -308,11 +304,11 @@ func TestTransform(t *testing.T) {
 				"hello",
 			},
 			listOutput: []string{
-				"[whatever,hi],hello",
+				"whatever,hi],hello",
 			},
 		},
 		{
-			name:     "EchoesCorrectlyDataThatLooksLikeObjEnd",
+			name:     "EchoesDataThatLooksLikeObjEnd",
 			selector: ":field",
 			input: []string{
 				"whatever",
@@ -325,7 +321,24 @@ func TestTransform(t *testing.T) {
 				"hello",
 			},
 			listOutput: []string{
-				"[whatever,hi},hello",
+				"whatever,hi},hello",
+			},
+		},
+		{
+			name:     "EchoesLists",
+			selector: ":field",
+			input: []string{
+				`{"field":"test"}`,
+				`[1,2,3]`,
+			},
+			streamOutput: []string{
+				"test",
+				"",
+				"[1,2,3]",
+			},
+			listOutput: []string{
+				"test",
+				",[1,2,3]",
 			},
 		},
 	}
