@@ -18,11 +18,13 @@ import (
 
 func TestTransform(t *testing.T) {
 	type Test struct {
-		name     string
-		selector string
-		input    []string
-		output   []string
-		wantErr  error
+		name         string
+		selector     string
+		input        []string
+		output       []string
+		streamOutput []string
+		listOutput   []string
+		wantErr      error
 	}
 
 	tests := []Test{
@@ -268,10 +270,13 @@ func TestTransform(t *testing.T) {
 				"stonks",
 				"hello",
 			},
-			output: []string{
+			streamOutput: []string{
 				"whatever",
 				"stonks",
 				"hello",
+			},
+			listOutput: []string{
+				"whatever,stonks,hello",
 			},
 		},
 	}
@@ -281,12 +286,20 @@ func TestTransform(t *testing.T) {
 
 		t.Run(test.name+"ParsingList", func(t *testing.T) {
 			input := strings.NewReader("[" + strings.Join(test.input, ",") + "]")
-			testTransform(t, input, test.selector, test.output, test.wantErr)
+			wantOutput := test.output
+			if len(test.listOutput) > 0 {
+				wantOutput = test.listOutput
+			}
+			testTransform(t, input, test.selector, wantOutput, test.wantErr)
 		})
 
 		t.Run(test.name+"ParsingStream", func(t *testing.T) {
 			input := strings.NewReader(strings.Join(test.input, "\n"))
-			testTransform(t, input, test.selector, test.output, test.wantErr)
+			wantOutput := test.output
+			if len(test.streamOutput) > 0 {
+				wantOutput = test.streamOutput
+			}
+			testTransform(t, input, test.selector, wantOutput, test.wantErr)
 		})
 	}
 }
