@@ -223,8 +223,6 @@ func (b *bufferedReader) Read(data []byte) (int, error) {
 
 	b.readErr = err
 
-	fmt.Println("KMLO READ:", string(data))
-
 	if n > 0 {
 		b.buffer = append(b.buffer, data[0])
 	}
@@ -241,6 +239,5 @@ func (b *bufferedReader) readBuffer() []byte {
 }
 
 func (b *bufferedReader) reset() {
-	fmt.Println("KMLO RESET:", string(b.buffer))
 	b.buffer = make([]byte, 0, 1024)
 }
