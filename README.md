@@ -60,7 +60,7 @@ go install -i github.com/katcipis/jtoh/cmd/jtoh
 # What
  
 jtoh will produce a newline for each JSON document found on the list/stream,
-accepting a projection string as a parameter indicating which fields are going
+accepting a selector string as a parameter indicating which fields are going
 to be used to compose each newline and what is the separator between each field:
  
 ```
@@ -68,14 +68,14 @@ to be used to compose each newline and what is the separator between each field:
 ```
 
 Where **<sep>** is the first character and will be considered the separator,
-it is used to separate different field definitions and will also be used
+it is used to separate different field selectors and will also be used
 as the separator on the output, this:
 
 ```
 <source of JSON list> | jtoh ":field1:field2"
 ```
 
-Will generate an stream of outputs like:
+Will generate an stream of outputs like this:
 
 ```
 data1:data2
@@ -117,11 +117,10 @@ You will probably have a long list of something like this:
 }
 ```
 
-In this case the application does no JSON structured logging
-(which is perfectly fine in some scenarios),
-but there is a lot of data around the
+In this case the application does no JSON structured logging,
+there is a lot of data around the
 actual application log that can be useful for filtering but after
-being used for filtering is pure cognitive noise.
+being used for filtering it is pure cognitive noise.
 
 Using jtoh like this:
 
@@ -140,5 +139,18 @@ get when the application structure the log entries as JSON and you get the
 logs directly from Kubernetes using kubectl like this:
 
 ```
-TODO
+TODO: Kubernetes examples :-)
 ```
+
+# Error Handling
+
+One thing that makes jtoh very different than usual JSON parsing tools is
+how it handles errors. Anything that is not JSON will be just echoed back
+and it will keep trying to parse the rest of the data.
+
+The idea is to cover scenarios where application have hybrid logs, where
+sometimes it is JSON and sometimes it is just a stack trace or something
+else. These scenarios are not ideal, the software should be fixed, but
+life is not ideal, so if you are in this situation jtoh may help you
+analyze the logs :-) (and hopefully in time you will also fix the logs
+so they become uniform/consistent).

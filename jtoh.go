@@ -1,9 +1,11 @@
 package jtoh
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -49,39 +51,66 @@ func New(s string) (J, error) {
 }
 
 // Do receives a json stream as input and transforms it
-// in simple lines of text (newline-delimited) which is
+// in lines of text (newline-delimited) which is
 // then written in the provided writer.
 //
 // This function will block until all data is read from the input
 // and written on the output.
-func (j J) Do(jsonInput io.Reader, textOutput io.Writer) {
+func (j J) Do(jsonInput io.Reader, linesOutput io.Writer) {
 	jsonInput, ok := isList(jsonInput)
-	dec := json.NewDecoder(jsonInput)
+	// Why not bufio ? what we need here is kinda like
+	// buffered io, but not exactly the same (was not able to
+	// come up with a better name to it).
+	bufinput := bufferedReader{r: jsonInput}
+	dec := json.NewDecoder(&bufinput)
 
 	if ok {
 		// WHY: To handle properly gigantic lists of JSON objs
 		// Really don't need the return value, but linters can be annoying =P
 		_, _ = dec.Token()
+		bufinput.reset()
 	}
 
-	for dec.More() {
-		m := map[string]interface{}{}
-		err := dec.Decode(&m)
-		if err != nil {
-			// TODO: handle non disruptive parse errors
-			// Ideally we want the original non-JSON data
-			// Will need some form of extended reader that remembers
-			// part of the read data (not all, don't want O(N) spatial
-			// complexity).
-			fmt.Fprintf(textOutput, "TODO:HANDLERR:%v\n", err)
-			return
-		}
+	var errBuffer []byte
 
-		fieldValues := make([]string, len(j.fieldSelectors))
-		for i, fieldSelector := range j.fieldSelectors {
-			fieldValues[i] = selectField(fieldSelector, m)
+	// TODO: Right now we have space complexity O(N) when the input is not JSON
+	// For huge chunks of non JSON data this may be a problem
+	for bufinput.hasData() {
+		for dec.More() {
+			m := map[string]interface{}{}
+			err := dec.Decode(&m)
+			dataUsedOnDecode := bufinput.readBuffer()
+			bufinput.reset()
+
+			if err != nil {
+				errBuffer = append(errBuffer, dataUsedOnDecode...)
+				dec = json.NewDecoder(&bufinput)
+				continue
+			}
+
+			writeErrs(linesOutput, errBuffer)
+			errBuffer = nil
+
+			fieldValues := make([]string, len(j.fieldSelectors))
+			for i, fieldSelector := range j.fieldSelectors {
+				fieldValues[i] = selectField(fieldSelector, m)
+			}
+			fmt.Fprint(linesOutput, strings.Join(fieldValues, j.separator)+"\n")
 		}
-		fmt.Fprint(textOutput, strings.Join(fieldValues, j.separator)+"\n")
+		dec = json.NewDecoder(&bufinput)
+	}
+
+	writeErrs(linesOutput, errBuffer)
+}
+
+func writeErrs(w io.Writer, errBuffer []byte) {
+	if len(errBuffer) == 0 {
+		return
+	}
+	errBuffer = append(errBuffer, '\n')
+	n, err := w.Write(errBuffer)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "jtoh:error writing error buffer: wrote %d bytes, details: %v\n", n, err)
 	}
 }
 
@@ -145,16 +174,8 @@ func isList(jsons io.Reader) (io.Reader, bool) {
 			continue
 		}
 
-		if firstToken == '[' {
-			return io.MultiReader(strings.NewReader("["), jsons), true
-		}
-
-		if firstToken == '{' {
-			return io.MultiReader(strings.NewReader("{"), jsons), false
-		}
-
-		// FIXME: Probably would be better to fail here with a more clear error =P
-		return jsons, false
+		isList := firstToken == '['
+		return io.MultiReader(bytes.NewBuffer([]byte{firstToken}), jsons), isList
 	}
 }
 
@@ -172,4 +193,51 @@ func trimSpaces(s []string) []string {
 		trimmed[i] = strings.TrimSpace(v)
 	}
 	return trimmed
+}
+
+// bufferedReader is not exactly like the bufio on stdlib.
+// The idea is to use it as a means to buffer read data
+// until reset is called. We need this so when
+// the JSON decoder finds an error in the stream we can retrieve
+// exactly how much has been read between the last successful
+// decode and the current error and echo it.
+//
+// To guarantee that we provide data byte per byte, which is
+// not terribly efficient but was the only way so far to be sure
+// (assuming that the json decoder does no lookahead) that when
+// an error occurs on the json decoder we have the exact byte stream that
+// caused the error (I would welcome with open arms a better solution x_x).
+type bufferedReader struct {
+	r       io.Reader
+	buffer  []byte
+	readErr error
+}
+
+func (b *bufferedReader) Read(data []byte) (int, error) {
+	if len(data) == 0 {
+		return 0, nil
+	}
+
+	data = data[:1]
+	n, err := b.r.Read(data)
+
+	b.readErr = err
+
+	if n > 0 {
+		b.buffer = append(b.buffer, data[0])
+	}
+
+	return n, err
+}
+
+func (b *bufferedReader) hasData() bool {
+	return b.readErr == nil
+}
+
+func (b *bufferedReader) readBuffer() []byte {
+	return b.buffer
+}
+
+func (b *bufferedReader) reset() {
+	b.buffer = make([]byte, 0, 1024)
 }

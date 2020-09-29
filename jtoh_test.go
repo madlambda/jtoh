@@ -12,18 +12,15 @@ import (
 	"github.com/katcipis/jtoh"
 )
 
-// TODO:
-// JSON stream that has a list inside
-// JSON List that has a list inside
-// Non JSON data mixed with JSON data (stream of JSONs with sometimes something that is not JSON)
-
 func TestTransform(t *testing.T) {
 	type Test struct {
-		name     string
-		selector string
-		input    []string
-		output   []string
-		wantErr  error
+		name         string
+		selector     string
+		input        []string
+		output       []string
+		streamOutput []string
+		listOutput   []string
+		wantErr      error
 	}
 
 	tests := []Test{
@@ -178,7 +175,7 @@ func TestTransform(t *testing.T) {
 		{
 			// Not entirely sure that trimming is the way to go in this case
 			// But it seems pretty odd to have a json key with trailing spaces
-			// And at the same time it would be valid JSON
+			// But it would be valid JSON...
 			name:     "FieldAccessorTrailingSpacesAreTrimmed",
 			selector: ": field :  field2  ",
 			input:    []string{`{"field":666, "field2":"lala"}`},
@@ -223,19 +220,148 @@ func TestTransform(t *testing.T) {
 			},
 			output: []string{"BeforeNewline", "AfterNewline", "value2"},
 		},
+		{
+			name:     "IfFirstItemIsNotJSONItIsEchoed",
+			selector: ":field",
+			input: []string{
+				`Just some plain text mixed among JSON`,
+				`{"field":"stonks"}`,
+			},
+			streamOutput: []string{
+				"Just some plain text mixed among JSON",
+				"stonks",
+			},
+			listOutput: []string{
+				"Just some plain text mixed among JSON,",
+				"stonks",
+			},
+		},
+		{
+			name:     "NonJSONOnMiddleOfValidJSONObjsIsEchoed",
+			selector: ":field",
+			input: []string{
+				`{"field":"stonks"}`,
+				`Just some plain text mixed among JSON`,
+				`{"field":"stonks2"}`,
+			},
+			streamOutput: []string{
+				"stonks",
+				"",
+				"Just some plain text mixed among JSON",
+				"stonks2",
+			},
+			listOutput: []string{
+				"stonks",
+				",Just some plain text mixed among JSON,",
+				"stonks2",
+			},
+		},
+		{
+			name:     "IfLastItemIsNotJSONItIsEchoed",
+			selector: ":field",
+			input: []string{
+				`{"field":"stonks"}`,
+				`Just some plain text mixed among JSON`,
+			},
+			streamOutput: []string{
+				"stonks",
+				"",
+				"Just some plain text mixed among JSON",
+			},
+			listOutput: []string{
+				"stonks",
+				",Just some plain text mixed among JSON",
+			},
+		},
+		{
+			name:     "IfNothingIsValidJSONAllDataIsEchoed",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"stonks",
+				"hello",
+			},
+			streamOutput: []string{
+				"whatever",
+				"stonks",
+				"hello",
+			},
+			listOutput: []string{
+				"whatever,stonks,hello",
+			},
+		},
+		{
+			name:     "EchoesCorrectlyDataThatLooksLikeListEnd",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"hi]",
+				"hello",
+			},
+			streamOutput: []string{
+				"whatever",
+				"hi]",
+				"hello",
+			},
+			listOutput: []string{
+				"whatever,hi],hello",
+			},
+		},
+		{
+			name:     "EchoesDataThatLooksLikeObjEnd",
+			selector: ":field",
+			input: []string{
+				"whatever",
+				"hi}",
+				"hello",
+			},
+			streamOutput: []string{
+				"whatever",
+				"hi}",
+				"hello",
+			},
+			listOutput: []string{
+				"whatever,hi},hello",
+			},
+		},
+		{
+			name:     "EchoesLists",
+			selector: ":field",
+			input: []string{
+				`{"field":"test"}`,
+				`[1,2,3]`,
+			},
+			streamOutput: []string{
+				"test",
+				"",
+				"[1,2,3]",
+			},
+			listOutput: []string{
+				"test",
+				",[1,2,3]",
+			},
+		},
 	}
 
 	for i := range tests {
 		test := tests[i]
 
-		t.Run(test.name+"WithList", func(t *testing.T) {
+		t.Run(test.name+"ParsingList", func(t *testing.T) {
 			input := strings.NewReader("[" + strings.Join(test.input, ",") + "]")
-			testTransform(t, input, test.selector, test.output, test.wantErr)
+			wantOutput := test.output
+			if len(test.listOutput) > 0 {
+				wantOutput = test.listOutput
+			}
+			testTransform(t, input, test.selector, wantOutput, test.wantErr)
 		})
 
-		t.Run(test.name+"WithStream", func(t *testing.T) {
+		t.Run(test.name+"ParsingStream", func(t *testing.T) {
 			input := strings.NewReader(strings.Join(test.input, "\n"))
-			testTransform(t, input, test.selector, test.output, test.wantErr)
+			wantOutput := test.output
+			if len(test.streamOutput) > 0 {
+				wantOutput = test.streamOutput
+			}
+			testTransform(t, input, test.selector, wantOutput, test.wantErr)
 		})
 	}
 }
