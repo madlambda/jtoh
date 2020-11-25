@@ -21,7 +21,7 @@ like this (but much bigger):
             {"Name": "Ed", "Text": "Go fmt."},
             {"Name": "Sam", "Text": "Go fmt who?"},
             {"Name": "Ed", "Text": "Go fmt yourself!"}
-    ]
+]
 ```
 
 And jq by default does no stream processing, and the stream mode is not
