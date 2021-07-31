@@ -22,6 +22,19 @@ func BenchmarkNonJSONStreams(b *testing.B) {
 	}
 }
 
+func BenchmarkJSONStreams(b *testing.B) {
+	msgCounts := []int{10, 100, 1000, 10000}
+
+	for _, msgCount := range msgCounts {
+		b.Run(fmt.Sprintf("%d Messages", msgCount), func(b *testing.B) {
+			const testmsg = "{ \"data\" : \"bench\" }\n"
+			const selector = ":data"
+
+			benchmarkStream(b, selector, testmsg, msgCount)
+		})
+	}
+}
+
 func benchmarkStream(b *testing.B, selector, msg string, msgCount int) {
 	for i := 0; i < b.N; i++ {
 		j, err := jtoh.New(selector)

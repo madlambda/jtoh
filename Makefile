@@ -20,8 +20,12 @@ lint:
 test:
 	go test -timeout 10s -race -coverprofile=$(cov) ./...
 
+bench: name?=.
 bench:
-	go test -bench=. -benchmem ./...
+	go test -bench=$(name) -benchmem -memprofile=memory.p .
+
+bench/mem/analyze:
+	go tool pprof memory.p
 
 .PHONY: coverage
 coverage: test
