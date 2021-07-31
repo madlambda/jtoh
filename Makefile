@@ -37,3 +37,9 @@ coverage: test
 .PHONY: install
 install:
 	go install $(buildflags) ./cmd/jtoh
+
+.PHONY: cleanup
+cleanup:
+	rm -f *.prof
+	rm -f jtoh.test
+	rm -f cmd/jtoh/jtoh
