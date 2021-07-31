@@ -20,6 +20,9 @@ lint:
 test:
 	go test -timeout 10s -race -coverprofile=$(cov) ./...
 
+bench:
+	go test -bench=. -benchmem ./...
+
 .PHONY: coverage
 coverage: test
 	go tool cover -html=$(cov) -o=$(covhtml)
