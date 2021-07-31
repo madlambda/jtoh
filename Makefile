@@ -2,6 +2,7 @@ version?=$(shell git rev-list -1 HEAD)
 cov=coverage.out
 covhtml=coverage.html
 buildflags=-ldflags "-X main.Version=${version}"
+golangci_lint_version=1.41.1
 
 all: build test lint
 
@@ -11,10 +12,7 @@ build:
 
 .PHONY: lint
 lint:
-	golangci-lint run ./... \
-	    --enable=unparam --enable=unconvert --enable=dupl --enable=gofmt \
-	    --enable=stylecheck --enable=scopelint --enable=nakedret --enable=misspell \
-	    --enable=goconst --enable=dogsled --enable=bodyclose --enable=whitespace --enable=golint
+	docker run --rm -v `pwd`:/app -w /app golangci/golangci-lint:v$(golangci_lint_version)  golangci-lint run ./...
 
 .PHONY: test
 test:
