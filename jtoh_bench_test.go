@@ -1,6 +1,7 @@
 package jtoh_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -8,26 +9,20 @@ import (
 	"github.com/madlambda/spells/iotest"
 )
 
-func BenchmarkNonJSONStream10Msgs(b *testing.B) {
-	benchmarkNonJSONStream(b, 10)
+func BenchmarkNonJSONStreams(b *testing.B) {
+	msgCounts := []int{10, 100, 1000, 10000}
+
+	for _, msgCount := range msgCounts {
+		b.Run(fmt.Sprintf("%d Messages", msgCount), func(b *testing.B) {
+			const testmsg = "non-json-test-msg\n"
+			const selector = ":field"
+
+			benchmarkStream(b, selector, testmsg, msgCount)
+		})
+	}
 }
 
-func BenchmarkNonJSONStream100Msgs(b *testing.B) {
-	benchmarkNonJSONStream(b, 100)
-}
-
-func BenchmarkNonJSONStream1000Msgs(b *testing.B) {
-	benchmarkNonJSONStream(b, 1000)
-}
-
-func BenchmarkNonJSONStream10000Msgs(b *testing.B) {
-	benchmarkNonJSONStream(b, 10000)
-}
-
-func benchmarkNonJSONStream(b *testing.B, msgCount int) {
-	const testmsg = "non-json-test-msg\n"
-	const selector = ":field"
-
+func benchmarkStream(b *testing.B, selector, msg string, msgCount int) {
 	for i := 0; i < b.N; i++ {
 		j, err := jtoh.New(selector)
 		if err != nil {
@@ -35,7 +30,7 @@ func benchmarkNonJSONStream(b *testing.B, msgCount int) {
 			return
 		}
 
-		repeater := iotest.NewRepeatReader(strings.NewReader(testmsg), msgCount)
+		repeater := iotest.NewRepeatReader(strings.NewReader(msg), msgCount)
 		j.Do(repeater, NopWriter{})
 	}
 }
