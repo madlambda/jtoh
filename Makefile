@@ -22,10 +22,13 @@ test:
 
 bench: name?=.
 bench:
-	go test -bench=$(name) -benchmem -memprofile=memory.p .
+	go test -bench=$(name) -benchmem -memprofile=mem.prof -cpuprofile cpu.prof .
 
 bench/mem/analyze:
-	go tool pprof memory.p
+	go tool pprof mem.prof
+
+bench/cpu/analyze:
+	go tool pprof cpu.prof
 
 .PHONY: coverage
 coverage: test

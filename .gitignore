@@ -3,4 +3,4 @@
 /jtoh
 /cmd/jtoh/jtoh
 jtoh.test
-memory.p
+*.prof
