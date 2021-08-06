@@ -23,6 +23,10 @@ bench: name?=.
 bench:
 	go test -bench=$(name) -benchmem -memprofile=mem.prof -cpuprofile cpu.prof .
 
+.PHONY: time/bench
+time/bench:
+	time -v go test -bench=. .
+
 .PHONY: bench/mem/analyze
 bench/mem/analyze:
 	go tool pprof mem.prof
