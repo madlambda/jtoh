@@ -10,41 +10,36 @@ import (
 )
 
 func BenchmarkNonJSONStreams(b *testing.B) {
-	msgCounts := []int{10, 100, 1000, 10000}
+	msgCounts := []int{1000, 10000, 100000, 1000000}
+	testmsg := "non-json-test-msg\n"
+	selector := ":field"
 
-	for _, msgCount := range msgCounts {
-		b.Run(fmt.Sprintf("%d Messages", msgCount), func(b *testing.B) {
-			const testmsg = "non-json-test-msg\n"
-			const selector = ":field"
-
-			benchmarkStream(b, selector, testmsg, msgCount)
-		})
-	}
+	benchmarkStream(b, selector, testmsg, msgCounts)
 }
 
 func BenchmarkJSONStreams(b *testing.B) {
-	msgCounts := []int{10, 100, 1000, 10000}
+	msgCounts := []int{1000, 10000, 100000, 1000000}
+	testmsg := "{ \"field\" : \"bench\" }\n"
+	selector := ":field"
 
-	for _, msgCount := range msgCounts {
-		b.Run(fmt.Sprintf("%d Messages", msgCount), func(b *testing.B) {
-			const testmsg = "{ \"data\" : \"bench\" }\n"
-			const selector = ":data"
-
-			benchmarkStream(b, selector, testmsg, msgCount)
-		})
-	}
+	benchmarkStream(b, selector, testmsg, msgCounts)
 }
 
-func benchmarkStream(b *testing.B, selector, msg string, msgCount int) {
-	for i := 0; i < b.N; i++ {
-		j, err := jtoh.New(selector)
-		if err != nil {
-			b.Errorf("unexpected error [%v]", err)
-			return
-		}
+func benchmarkStream(b *testing.B, selector, msg string, msgCounts []int) {
+	for _, msgCount := range msgCounts {
+		b.Run(fmt.Sprintf("%d Messages", msgCount), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				j, err := jtoh.New(selector)
+				if err != nil {
+					b.Errorf("unexpected error [%v]", err)
+					return
+				}
 
-		repeater := iotest.NewRepeatReader(strings.NewReader(msg), msgCount)
-		j.Do(repeater, NopWriter{})
+				repeater := iotest.NewRepeatReader(strings.NewReader(msg), msgCount)
+				j.Do(repeater, NopWriter{})
+			}
+
+		})
 	}
 }
 
