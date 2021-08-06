@@ -18,13 +18,16 @@ lint:
 test:
 	go test -timeout 10s -race -coverprofile=$(cov) ./...
 
+.PHONY: bench
 bench: name?=.
 bench:
 	go test -bench=$(name) -benchmem -memprofile=mem.prof -cpuprofile cpu.prof .
 
+.PHONY: bench/mem/analyze
 bench/mem/analyze:
 	go tool pprof mem.prof
 
+.PHONY: bench/cpu/analyze
 bench/cpu/analyze:
 	go tool pprof cpu.prof
 
