@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/katcipis/jtoh"
+	"github.com/madlambda/jtoh"
 )
 
 func TestTransform(t *testing.T) {
