@@ -1,4 +1,4 @@
-module github.com/katcipis/jtoh
+module github.com/madlambda/jtoh
 
 go 1.16
 
