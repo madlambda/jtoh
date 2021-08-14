@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/katcipis/jtoh"
+	"github.com/madlambda/jtoh"
 	"github.com/madlambda/spells/iotest"
 )
 
