@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/katcipis/jtoh"
+	"github.com/madlambda/jtoh"
 )
 
 // Version of the code used to build the jtoh tool
