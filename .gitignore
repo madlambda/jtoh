@@ -2,3 +2,5 @@
 /coverage.html
 /jtoh
 /cmd/jtoh/jtoh
+jtoh.test
+*.prof
