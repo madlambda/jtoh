@@ -2,6 +2,7 @@ package jtoh_test
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
@@ -36,15 +37,9 @@ func benchmarkStream(b *testing.B, selector, msg string, msgCounts []int) {
 				}
 
 				repeater := iotest.NewRepeatReader(strings.NewReader(msg), msgCount)
-				j.Do(repeater, NopWriter{})
+				j.Do(repeater, io.Discard)
 			}
 
 		})
 	}
-}
-
-type NopWriter struct{}
-
-func (n NopWriter) Write(a []byte) (int, error) {
-	return len(a), nil
 }
