@@ -1,9 +1,9 @@
-name: CI
+name: tests
 on: [push]
 jobs:
 
   build:
-    name: Build and Test
+    name: building and testing
 
     runs-on: ${{ matrix.os }}
 
@@ -14,20 +14,20 @@ jobs:
 
     steps:
 
-    - name: Set up Go ${{ matrix.go }}
+    - name: set up Go ${{ matrix.go }}
       uses: actions/setup-go@v1
       with:
         go-version: ${{ matrix.go }}
       id: go
 
-    - name: Check out code into the Go module directory
+    - name: checkout code
       uses: actions/checkout@v1
 
-    - name: Build
+    - name: build
       run: make build
 
-    - name: Test
+    - name: test
       run: make test
 
-    - name: Benchmarks
+    - name: benchmarks
       run: make bench

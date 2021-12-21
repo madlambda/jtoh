@@ -1,6 +1,9 @@
 # jtoh
 
-![CI Status](https://github.com/katcipis/jtoh/workflows/CI/badge.svg)[![Go Report Card](https://goreportcard.com/badge/github.com/katcipis/jtoh)](https://goreportcard.com/report/github.com/katcipis/jtoh)
+[![GoDoc](https://godoc.org/github.com/madlambda/jtoh?status.svg)](https://godoc.org/github.com/madlambda/jtoh)
+![Static Analysis Status](https://github.com/madlambda/jtoh/actions/workflows/lint.yml/badge.svg)
+![Test Status](https://github.com/madlambda/jtoh/actions/workflows/test.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/madlambda/jtoh)](https://goreportcard.com/report/github.com/madlambda/jtoh)
 
 jtoh stands for JSON To Human, basically makes it easier to analyze long
 streams of JSON objects.

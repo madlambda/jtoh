@@ -1,6 +1,9 @@
+# Set default shell to bash
+SHELL := /bin/bash -o pipefail -o errexit -o nounset
+
+COVERAGE_REPORT ?= coverage.txt
+
 version?=$(shell git rev-list -1 HEAD)
-cov=coverage.out
-covhtml=coverage.html
 buildflags=-ldflags "-X main.Version=${version}"
 golangci_lint_version=1.41.1
 
@@ -16,7 +19,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -timeout 10s -race -coverprofile=$(cov) ./...
+	go test -timeout 10s -race ./...
 
 .PHONY: bench
 bench: name?=.
@@ -36,8 +39,12 @@ bench/cpu/analyze:
 	go tool pprof cpu.prof
 
 .PHONY: coverage
-coverage: test
-	go tool cover -html=$(cov) -o=$(covhtml)
+coverage: 
+	go test -coverprofile=$(COVERAGE_REPORT) ./...
+
+.PHONY: coverage/show
+coverage/show: coverage
+	go tool cover -html=$(COVERAGE_REPORT)
 
 .PHONY: install
 install:
