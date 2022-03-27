@@ -5,7 +5,7 @@ COVERAGE_REPORT ?= coverage.txt
 
 version?=$(shell git rev-list -1 HEAD)
 buildflags=-ldflags "-X main.Version=${version}"
-golangci_lint_version=1.41.1
+golangci_lint_version=v1.45.0
 
 all: build test lint
 
@@ -15,7 +15,7 @@ build:
 
 .PHONY: lint
 lint:
-	docker run --rm -v `pwd`:/app -w /app golangci/golangci-lint:v$(golangci_lint_version)  golangci-lint run ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(golangci_lint_version)  run ./...
 
 .PHONY: test
 test:
