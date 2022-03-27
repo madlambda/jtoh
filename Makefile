@@ -21,6 +21,10 @@ lint:
 test:
 	go test -timeout 10s -race ./...
 
+.PHONY: test/fuzz
+test/fuzz:
+	go test -fuzz=FuzzJTOH
+
 .PHONY: bench
 bench: name?=.
 bench:
