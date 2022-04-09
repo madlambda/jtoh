@@ -122,21 +122,35 @@ func FuzzJTOHValid(f *testing.F) {
 			return
 		}
 
-		selector := ":" + key
+		// key/value may change on marshalling, so we get the actual
+		// final key/value from the json encoding/decoding process.
+		parsedInput := map[string]string{}
+		if err = json.Unmarshal(input, &parsedInput); err != nil {
+			t.Fatal(err)
+		}
+
+		var selectKey, wantValue string
+
+		for k, v := range parsedInput {
+			selectKey = k
+			wantValue = v
+		}
+
+		selector := ":" + selectKey
 
 		j, err := jtoh.New(selector)
 		if err != nil {
 			t.Fatal(err)
-			return
 		}
 
 		output := &bytes.Buffer{}
 		j.Do(bytes.NewReader(input), output)
 
-		want := val + "\n"
+		want := wantValue + "\n"
 		got := output.String()
 		if got != want {
-			t.Fatalf("got %q != %q", got, want)
+			t.Errorf("str  : got %q != want %q", got, want)
+			t.Errorf("bytes: got %v != want %v", []byte(got), []byte(want))
 		}
 	})
 }
