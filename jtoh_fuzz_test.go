@@ -109,10 +109,13 @@ func FuzzJTOHValid(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, key string, val string) {
+		// Since field selectors have spaces trimmed for now we also
+		// trim the key, or else we would not be able to select the key.
+		key = strings.TrimSpace(key)
 		if key == "" {
 			return
 		}
-		if strings.Contains(key, ".") {
+		if strings.ContainsAny(key, ".:") {
 			// We don't handle nesting/keys with dot on name for now.
 			return
 		}
@@ -146,6 +149,10 @@ func FuzzJTOHValid(f *testing.F) {
 		output := &bytes.Buffer{}
 		j.Do(bytes.NewReader(input), output)
 
+		// Newlines on values are escaped to avoid breaking the
+		// line oriented nature of the output.
+
+		wantValue = strings.Replace(wantValue, "\n", "\\n", -1)
 		want := wantValue + "\n"
 		got := output.String()
 		if got != want {
