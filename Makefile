@@ -25,7 +25,7 @@ test:
 test/fuzz:
 	go test -fuzz=FuzzJTOH
 
-.PHONY: test/fuzz/properties
+.PHONY: test/fuzz/valid
 test/fuzz/valid:
 	go test -fuzz=FuzzJTOHValid
 
