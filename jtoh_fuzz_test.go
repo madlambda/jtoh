@@ -146,18 +146,26 @@ func FuzzJTOHValid(f *testing.F) {
 			t.Fatal(err)
 		}
 
-		output := &bytes.Buffer{}
-		j.Do(bytes.NewReader(input), output)
-
 		// Newlines on values are escaped to avoid breaking the
 		// line oriented nature of the output.
-
 		wantValue = strings.Replace(wantValue, "\n", "\\n", -1)
 		want := wantValue + "\n"
-		got := output.String()
-		if got != want {
-			t.Errorf("str  : got %q != want %q", got, want)
-			t.Errorf("bytes: got %v != want %v", []byte(got), []byte(want))
+
+		testSelection := func(input []byte) {
+			output := &bytes.Buffer{}
+			j.Do(bytes.NewReader(input), output)
+
+			got := output.String()
+			if got != want {
+				t.Errorf("input: %q", string(input))
+				t.Errorf("str  : got %q != want %q", got, want)
+				t.Errorf("bytes: got %v != want %v", []byte(got), []byte(want))
+			}
 		}
+
+		// Selecting on single document/stream must behave identically to
+		// selecting from a list of documents.
+		testSelection(input)
+		testSelection([]byte("[" + string(input) + "]"))
 	})
 }
