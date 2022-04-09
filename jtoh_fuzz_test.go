@@ -5,6 +5,8 @@ package jtoh_test
 
 import (
 	"bytes"
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/madlambda/jtoh"
@@ -86,5 +88,55 @@ func FuzzJTOH(f *testing.F) {
 		}
 
 		j.Do(input, output)
+	})
+}
+
+func FuzzJTOHValid(f *testing.F) {
+	type seed struct {
+		key string
+		val string
+	}
+
+	seedCorpus := []seed{
+		{
+			key: "str",
+			val: "str",
+		},
+	}
+
+	for _, seed := range seedCorpus {
+		f.Add(seed.key, seed.val)
+	}
+
+	f.Fuzz(func(t *testing.T, key string, val string) {
+		if key == "" {
+			return
+		}
+		if strings.Contains(key, ".") {
+			// We don't handle nesting/keys with dot on name for now.
+			return
+		}
+
+		input, err := json.Marshal(map[string]string{key: val})
+		if err != nil {
+			return
+		}
+
+		selector := ":" + key
+
+		j, err := jtoh.New(selector)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+
+		output := &bytes.Buffer{}
+		j.Do(bytes.NewReader(input), output)
+
+		want := val + "\n"
+		got := output.String()
+		if got != want {
+			t.Fatalf("got %q != %q", got, want)
+		}
 	})
 }

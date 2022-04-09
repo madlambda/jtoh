@@ -25,6 +25,10 @@ test:
 test/fuzz:
 	go test -fuzz=FuzzJTOH
 
+.PHONY: test/fuzz/properties
+test/fuzz/valid:
+	go test -fuzz=FuzzJTOHValid
+
 .PHONY: bench
 bench: name?=.
 bench:
