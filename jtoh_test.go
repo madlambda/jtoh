@@ -129,6 +129,14 @@ func TestTransform(t *testing.T) {
 			output:   []string{fmt.Sprintf("hi:7:%s:false", missingFieldErrMsg("missing"))},
 		},
 		{
+			// There is no way to project a key that has . inside.
+			// This is not a desirable limitation, but we have it for now.
+			name:     "NestedAccessWontMatchSingleFieldWithDot",
+			selector: ":nested.val",
+			input:    []string{`{"nested.val" : "value" }`},
+			output:   []string{missingFieldErrMsg("nested.val")},
+		},
+		{
 			name:     "IncompletePathToField",
 			selector: ":nested.number",
 			input:    []string{`{"nested" : {} }`},
