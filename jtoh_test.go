@@ -129,6 +129,14 @@ func TestTransform(t *testing.T) {
 			output:   []string{fmt.Sprintf("hi:7:%s:false", missingFieldErrMsg("missing"))},
 		},
 		{
+			// There is no way to project a key that has . inside.
+			// This is not a desirable limitation, but we have it for now.
+			name:     "NestedAccessWontMatchSingleFieldWithDot",
+			selector: ":nested.val",
+			input:    []string{`{"nested.val" : "value" }`},
+			output:   []string{missingFieldErrMsg("nested.val")},
+		},
+		{
 			name:     "IncompletePathToField",
 			selector: ":nested.number",
 			input:    []string{`{"nested" : {} }`},
@@ -194,31 +202,31 @@ func TestTransform(t *testing.T) {
 			output:   []string{"666:stonks"},
 		},
 		{
-			name:     "TrailingNewlinesOnValuesAreTrimmed",
+			name:     "TrailingNewlinesOnValuesAreEscaped",
 			selector: ":field",
 			input: []string{
 				"{\"field\":\"\\nvalue1\\n\\n\"}",
 				"{\"field\":\"\\nvalue2\"}",
 			},
-			output: []string{"value1", "value2"},
+			output: []string{"\\nvalue1\\n\\n", "\\nvalue2"},
 		},
 		{
-			name:     "TrailingSpacesOnValuesAreTrimmed",
+			name:     "TrailingSpacesOnValuesArePreserved",
 			selector: ":field",
 			input: []string{
 				`{"field":" stonks "}`,
 				`{"field":"    stonks 2   "}`,
 			},
-			output: []string{"stonks", "stonks 2"},
+			output: []string{" stonks ", "    stonks 2   "},
 		},
 		{
-			name:     "NewlinesInsideValuesWillBePreserved",
+			name:     "NewlinesInsideValuesWillBeEscaped",
 			selector: ":field",
 			input: []string{
 				"{\"field\":\"BeforeNewline\\nAfterNewline\"}",
 				"{\"field\":\"value2\"}",
 			},
-			output: []string{"BeforeNewline", "AfterNewline", "value2"},
+			output: []string{"BeforeNewline\\nAfterNewline", "value2"},
 		},
 		{
 			name:     "IfFirstItemIsNotJSONItIsEchoed",
