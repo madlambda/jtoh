@@ -57,7 +57,7 @@ make install
 Or you can just run:
 
 ```
-go install -i github.com/madlambda/jtoh/cmd/jtoh
+go install github.com/madlambda/jtoh/cmd/jtoh@latest
 ```
 
 # What
