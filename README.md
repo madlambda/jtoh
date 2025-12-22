@@ -5,6 +5,8 @@
 ![Test Status](https://github.com/madlambda/jtoh/actions/workflows/test.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/madlambda/jtoh)](https://goreportcard.com/report/github.com/madlambda/jtoh)
 
+Moved to [codeberg.org](https://codeberg.org/madlambda/jtoh).
+
 jtoh stands for JSON To Human, basically makes it easier to analyze long
 streams of JSON objects.
 The main use case is to analyze structured logs from Kubernetes and GCP
